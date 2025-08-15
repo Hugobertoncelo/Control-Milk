@@ -69,7 +69,7 @@ export default function Dashboard() {
       <footer
         className={
           classSection +
-          " bg-gray-200 text-gray-700 mt-12 rounded-t-lg shadow-inner"
+          " bg-gray-100 text-gray-700 mt-18 rounded-t-lg shadow-inner"
         }
       >
         <Divider />
