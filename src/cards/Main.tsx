@@ -1,175 +1,176 @@
-import type { CardProps, Day, Settings } from "../support/types";
-
+import React, { useState, ChangeEvent, FormEvent } from "react";
 import {
+  Card,
+  Title,
   Text,
-  Flex,
-  Metric,
-  ProgressBar,
   TextInput,
+  Flex,
   Button,
-  ButtonInline,
-  Bold,
-  List,
-  ListItem,
+  Metric,
 } from "@tremor/react";
 
-import { CgGlassAlt, CgTime } from "react-icons/cg";
+import { getDay, getDataSet, insert } from "../support/data";
+import { formatDateString } from "../support/helpers";
+import type { Day, Insertion, Med } from "../support/types";
 
-import { useState, useEffect } from "react";
+export default function MainCard({
+  update,
+  onUpdate,
+  onAction,
+}: {
+  update?: number;
+  onUpdate?: () => void;
+  onAction?: (type: any, payload?: any) => void;
+}) {
+  const [wait, setWait] = useState(false);
 
-import { dayWeek, sum } from "../support/helpers";
+  const [medName, setMedName] = useState("");
+  const [medDose, setMedDose] = useState("");
 
-import {
-  getDay,
-  getSettings,
-  insert,
-  remove,
-  saveSettings,
-} from "../support/data";
+  const [customMl, setCustomMl] = useState("");
 
-export default function Main({
-  update = 0,
-  onUpdate = () => {},
-  onAction = () => {},
-}: CardProps) {
-  const [day, setDay] = useState<Day>(getDay());
-  const [wait, setWait] = useState<boolean>(false);
-  const [settings, setSettings] = useState<Settings>(getSettings());
+  const today: Day = getDay();
 
-  const sumDay: number = sum(day);
-  const porcent: number = Math.round((sumDay * 100) / settings.goal);
+  const totalMl = (today.data ?? []).reduce(
+    (acc: number, d: Insertion) => acc + (d?.v ?? 0),
+    0
+  );
 
-  useEffect(() => setDay(getDay()), [update]);
-  useEffect(() => saveSettings(settings), [settings]);
-
-  function changeWater(value: string) {
-    const water: number = parseInt(value.replace(/\D/g, "").substring(0, 3));
-    setSettings({ ...settings, water: isNaN(water) ? 0 : water });
-  }
-
-  function changeGoal() {
-    onAction("prompt", {
-      title: "Alterar meta de consumo de leite",
-      content:
-        "Dica: para a maioria das pessoas o consumo ideal de leite é 35 ml por kg de peso corporal",
-      placeholder: "Digite a Quantidade ...",
-      value: settings.goal.toString(),
-
-      onChange: (value) => value.replace(/\D/g, ""),
-
-      onConfirm: (value) => {
-        const goal = parseInt(value);
-
-        if (!isNaN(goal)) {
-          setSettings({ ...settings, goal });
-          onUpdate();
-        }
-      },
-    });
-  }
-
-  function pause() {
+  function handleAddMl(value: number) {
+    if (value <= 0) return;
     setWait(true);
-    setTimeout(() => setWait(false), 1000);
+    try {
+      insert(value);
+      onUpdate?.();
+      setCustomMl("");
+    } finally {
+      setTimeout(() => setWait(false), 300);
+    }
   }
 
-  function addWater(event: React.FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    insert(settings.water);
-    onUpdate();
-    pause();
-  }
+  function addMed(e: FormEvent) {
+    e.preventDefault();
 
-  function delWater(index: number, water: number) {
-    onAction("confirm", {
-      content: `Excluir ${water} ml de Leite?`,
-      onConfirm: () => {
-        remove(day.date, index);
-        onUpdate();
-        pause();
-      },
+    const dataset = getDataSet();
+    const date: string = formatDateString(new Date());
+
+    let day = dataset.find((d: Day) => d.date === date);
+
+    if (!day) {
+      day = {
+        date: date as `${number}-${number}-${number}`,
+        data: [],
+        meds: [],
+      };
+      dataset.push(day);
+    }
+
+    if (!Array.isArray(day.meds)) day.meds = [];
+
+    day.meds.push({
+      name: medName.trim(),
+      dose: medDose.trim(),
+      time: new Date().toLocaleTimeString().slice(0, 5),
     });
+
+    localStorage.setItem("dataset", JSON.stringify(dataset));
+
+    setMedName("");
+    setMedDose("");
+    onUpdate?.();
+  }
+
+  function removeMed(index: number) {
+    const dataset = getDataSet();
+    const date: string = formatDateString(new Date());
+    const day = dataset.find((d: Day) => d.date === date);
+    if (!day || !Array.isArray(day.meds)) return;
+
+    day.meds.splice(index, 1);
+    localStorage.setItem("dataset", JSON.stringify(dataset));
+    onUpdate?.();
   }
 
   return (
-    <>
-      <Text textAlignment="text-center">{dayWeek(day.date)}</Text>
+    <Card>
+      <Title>💧 Controle de Leite</Title>
 
-      <Flex
-        justifyContent="justify-center"
-        spaceX="space-x-1"
-        alignItems="items-baseline"
-      >
-        <Metric>{sumDay.toLocaleString()} ml</Metric>
-        <Text>/</Text>
-        <ButtonInline
-          text={settings.goal.toLocaleString() + " ml"}
-          onClick={changeGoal}
+      <Metric>{totalMl} ml</Metric>
+
+      <Flex justifyContent="justify-start" spaceX="space-x-2" marginTop="mt-4">
+        <TextInput
+          placeholder="Digite ml"
+          value={customMl}
+          onChange={(e: ChangeEvent<HTMLInputElement>) =>
+            setCustomMl(e.currentTarget.value.replace(/\D/g, ""))
+          }
+          maxWidth="max-w-xs"
           disabled={wait}
+        />
+        <Button
+          text="Adicionar"
+          onClick={() => handleAddMl(Number(customMl))}
+          disabled={wait || !customMl || Number(customMl) <= 0}
         />
       </Flex>
 
-      <ProgressBar
-        percentageValue={porcent}
-        color={porcent < 50 ? "red" : porcent < 100 ? "yellow" : "green"}
-        marginTop="mt-8"
-      />
+      <Title marginTop="mt-6">💊 Controle de Remédios</Title>
 
-      <form onSubmit={addWater} className="my-5 p-5 bg-blue-100 rounded">
+      <form onSubmit={addMed} className="my-4 p-4 bg-green-50 rounded">
         <TextInput
-          name="water"
-          value={settings.water !== 0 ? settings.water.toString() : ""}
-          onChange={(i) => changeWater(i.currentTarget.value)}
-          placeholder="Digite a Quantidade ..."
+          name="medName"
+          value={medName}
+          onChange={(e: ChangeEvent<HTMLInputElement>) =>
+            setMedName(e.currentTarget.value)
+          }
+          placeholder="Nome do remédio"
           maxWidth="max-w-none"
           disabled={wait}
         />
 
-        <Flex justifyContent="justify-center" marginTop="mt-8">
-          <Button
-            size="lg"
-            icon={CgGlassAlt}
-            importance="primary"
-            text="Adicionar"
-            type="submit"
-            disabled={settings.water === 0}
-            loading={wait}
-          />
+        <TextInput
+          name="medDose"
+          value={medDose}
+          onChange={(e: ChangeEvent<HTMLInputElement>) =>
+            setMedDose(e.currentTarget.value)
+          }
+          placeholder="Dose / Horário..."
+          maxWidth="max-w-none"
+          disabled={wait}
+          marginTop="mt-2"
+        />
+
+        <Flex justifyContent="justify-center" marginTop="mt-4">
+          <Button text="Adicionar" type="submit" disabled={wait} />
         </Flex>
       </form>
 
-      {day.data.length > 0 && (
-        <>
-          <Flex>
-            <Text>
-              <Bold>Horário</Bold>
-            </Text>
-            <Text>
-              <Bold>Quantidade</Bold>
-            </Text>
-          </Flex>
+      <div className="mt-4 space-y-2">
+        {Array.isArray(today.meds) && today.meds.length > 0 ? (
+          today.meds.map((m: Med, i: number) => (
+            <div
+              key={i}
+              className="p-3 bg-white shadow rounded flex justify-between items-center"
+            >
+              <div>
+                <strong>{m.name}</strong> — {m.dose}
+              </div>
 
-          <List>
-            {day.data.map((data, index) => (
-              <ListItem key={index}>
-                <Flex justifyContent="justify-start">
-                  <CgTime className="mr-1" />
-                  {data.t}
-                </Flex>
-                <Flex justifyContent="justify-end">
-                  <span className="mr-1">{data.v}&nbsp;ml</span>
-                  <ButtonInline
-                    color="red"
-                    text="X"
-                    onClick={() => delWater(index, data.v)}
-                    disabled={wait}
-                  />
-                </Flex>
-              </ListItem>
-            ))}
-          </List>
-        </>
-      )}
-    </>
+              <Flex spaceX="space-x-2" alignItems="items-center">
+                <span className="text-sm text-gray-500">{m.time}</span>
+                <Button
+                  text="X"
+                  color="red"
+                  size="xs"
+                  onClick={() => removeMed(i)}
+                />
+              </Flex>
+            </div>
+          ))
+        ) : (
+          <Text>Nenhum remédio adicionado hoje.</Text>
+        )}
+      </div>
+    </Card>
   );
 }

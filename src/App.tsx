@@ -35,7 +35,7 @@ export default function Dashboard() {
           height={64}
         />
         <Title>Hora do Leite</Title>
-        <Text>Gestão diária de ingestão de leite</Text>
+        <Text>Gestão diária de ingestão de Leite e controle de Remédios</Text>
       </header>
 
       <main className={classSection}>
