@@ -116,32 +116,47 @@ export default function MainCard({
 
       <Title marginTop="mt-6">💊 Controle de Remédios</Title>
 
-      <form onSubmit={addMed} className="my-4 p-4 bg-green-50 rounded">
-        <TextInput
+      <form onSubmit={addMed} className="my-4 p-4 bg-blue-50 rounded">
+        <select
           name="medName"
           value={medName}
-          onChange={(e: ChangeEvent<HTMLInputElement>) =>
+          onChange={(e: ChangeEvent<HTMLSelectElement>) =>
             setMedName(e.currentTarget.value)
           }
-          placeholder="Nome do remédio"
-          maxWidth="max-w-none"
+          className="w-full p-2 border rounded"
           disabled={wait}
-        />
+        >
+          <option value="">Selecione o Remédio</option>
+          <option value="Paracetamol">Paracetamol</option>
+          <option value="Ibuprofeno">Ibuprofeno</option>
+          <option value="Simeticona">Simeticona</option>
+          <option value="Vitamina C">Vitamina C</option>
+          <option value="Outros">Outros</option>
+        </select>
 
-        <TextInput
+        <select
           name="medDose"
           value={medDose}
-          onChange={(e: ChangeEvent<HTMLInputElement>) =>
+          onChange={(e: ChangeEvent<HTMLSelectElement>) =>
             setMedDose(e.currentTarget.value)
           }
-          placeholder="Dose / Horário..."
-          maxWidth="max-w-none"
+          className="w-full p-2 border rounded mt-2"
           disabled={wait}
-          marginTop="mt-2"
-        />
+        >
+          <option value="">Selecione as Gotas</option>
+          {[...Array(10)].map((_, i) => (
+            <option key={i} value={`${i + 1} gota(s)`}>
+              {i + 1} gota{i + 1 > 1 ? "s" : ""}
+            </option>
+          ))}
+        </select>
 
         <Flex justifyContent="justify-center" marginTop="mt-4">
-          <Button text="Adicionar" type="submit" disabled={wait} />
+          <Button
+            text="Adicionar"
+            type="submit"
+            disabled={wait || !medName || !medDose}
+          />
         </Flex>
       </form>
 

@@ -78,7 +78,7 @@ export default function Data({ update = 0 }: CardProps) {
           <Callout
             title="Nenhum dia selecionado"
             text="Selecione uma data para visualizar o seu histórico"
-            color="yellow"
+            color="blue"
           />
         )}
       </Block>
