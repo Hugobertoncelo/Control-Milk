@@ -1,17 +1,10 @@
 import type { ActionData } from "./support/types";
 
-import { Card, Title, Text, ColGrid, Divider } from "@tremor/react";
+import { Card, Title, Text, ColGrid } from "@tremor/react";
 
 import { Main, Data, Chart } from "./cards";
 
 import { useState } from "react";
-import {
-  FaWhatsapp,
-  FaInstagram,
-  FaLinkedin,
-  FaGlobe,
-  FaGithub,
-} from "react-icons/fa";
 
 import Modals from "./modals";
 import Footer from "./Footer";
@@ -21,6 +14,9 @@ export default function Dashboard() {
 
   const [update, setUpdate] = useState<number>(0);
   const [action, setAction] = useState<ActionData>();
+
+  // Estado para meta diária
+  const [dailyGoalValue, setDailyGoalValue] = useState<number>(150);
 
   return (
     <>
@@ -44,8 +40,10 @@ export default function Dashboard() {
           <Card shadow>
             <Main
               update={update}
+              dailyGoal={dailyGoalValue} // passa a meta para o MainCard
               onUpdate={() => setUpdate((update) => update + 1)}
               onAction={(type, payload) => setAction({ type, payload })}
+              setDailyGoal={setDailyGoalValue} // função para atualizar a meta
             />
           </Card>
 
@@ -61,6 +59,7 @@ export default function Dashboard() {
         <Card marginTop="mt-8" shadow>
           <Chart
             update={update}
+            goal={dailyGoalValue} // passa a meta para o gráfico
             onUpdate={() => setUpdate((update) => update + 1)}
             onAction={(type, payload) => setAction({ type, payload })}
           />

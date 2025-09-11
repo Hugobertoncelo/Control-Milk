@@ -7,26 +7,31 @@ import {
   Flex,
   Button,
   Metric,
+  ProgressBar,
 } from "@tremor/react";
 
 import { getDay, getDataSet, insert } from "../support/data";
 import { formatDateString } from "../support/helpers";
 import type { Day, Insertion, Med } from "../support/types";
 
-export default function MainCard({
-  update,
-  onUpdate,
-  onAction,
-}: {
+interface MainProps {
   update?: number;
   onUpdate?: () => void;
   onAction?: (type: any, payload?: any) => void;
-}) {
-  const [wait, setWait] = useState(false);
+  dailyGoal?: number; // meta diária
+  setDailyGoal?: React.Dispatch<React.SetStateAction<number>>; // função para atualizar a meta
+}
 
+export default function Main({
+  update,
+  onUpdate,
+  onAction,
+  dailyGoal = 150,
+  setDailyGoal,
+}: MainProps) {
+  const [wait, setWait] = useState(false);
   const [medName, setMedName] = useState("");
   const [medDose, setMedDose] = useState("");
-
   const [customMl, setCustomMl] = useState("");
 
   const today: Day = getDay();
@@ -35,6 +40,9 @@ export default function MainCard({
     (acc: number, d: Insertion) => acc + (d?.v ?? 0),
     0
   );
+
+  // calcula o progresso da meta
+  const progress = Math.min((totalMl / dailyGoal) * 100, 100);
 
   function handleAddMl(value: number) {
     if (value <= 0) return;
@@ -50,12 +58,9 @@ export default function MainCard({
 
   function addMed(e: FormEvent) {
     e.preventDefault();
-
     const dataset = getDataSet();
     const date: string = formatDateString(new Date());
-
     let day = dataset.find((d: Day) => d.date === date);
-
     if (!day) {
       day = {
         date: date as `${number}-${number}-${number}`,
@@ -64,17 +69,13 @@ export default function MainCard({
       };
       dataset.push(day);
     }
-
     if (!Array.isArray(day.meds)) day.meds = [];
-
     day.meds.push({
       name: medName.trim(),
       dose: medDose.trim(),
       time: new Date().toLocaleTimeString().slice(0, 5),
     });
-
     localStorage.setItem("dataset", JSON.stringify(dataset));
-
     setMedName("");
     setMedDose("");
     onUpdate?.();
@@ -85,18 +86,44 @@ export default function MainCard({
     const date: string = formatDateString(new Date());
     const day = dataset.find((d: Day) => d.date === date);
     if (!day || !Array.isArray(day.meds)) return;
-
     day.meds.splice(index, 1);
     localStorage.setItem("dataset", JSON.stringify(dataset));
     onUpdate?.();
   }
 
   return (
-    <Card>
+    <>
       <Title>💧 Controle de Leite</Title>
 
-      <Metric>{totalMl} ml</Metric>
+      {/* Input para meta diária */}
+      <Flex justifyContent="justify-start" spaceX="space-x-2" marginTop="mt-4">
+        <TextInput
+          placeholder="Meta diária (ml)"
+          value={dailyGoal.toString()}
+          onChange={(e: ChangeEvent<HTMLInputElement>) => {
+            const value = Number(e.currentTarget.value.replace(/\D/g, ""));
+            setDailyGoal?.(value);
+          }}
+          maxWidth="max-w-xs"
+        />
+      </Flex>
 
+      {/* Total ml + Meta */}
+      <Flex
+        justifyContent="justify-between"
+        alignItems="items-center"
+        marginTop="mt-4"
+      >
+        <Metric>{totalMl} ml</Metric>
+        <Text color="gray">Meta: {dailyGoal} ml</Text>
+      </Flex>
+
+      {/* Barra de progresso */}
+      <div className="mt-2">
+        <ProgressBar percentageValue={progress} color="blue" />
+      </div>
+
+      {/* Input para adicionar ml */}
       <Flex justifyContent="justify-start" spaceX="space-x-2" marginTop="mt-4">
         <TextInput
           placeholder="Digite ml"
@@ -114,8 +141,8 @@ export default function MainCard({
         />
       </Flex>
 
+      {/* Controle de remédios */}
       <Title marginTop="mt-6">💊 Controle de Remédios</Title>
-
       <form onSubmit={addMed} className="my-4 p-4 bg-blue-50 rounded">
         <select
           name="medName"
@@ -160,6 +187,7 @@ export default function MainCard({
         </Flex>
       </form>
 
+      {/* Lista de remédios */}
       <div className="mt-4 space-y-2">
         {Array.isArray(today.meds) && today.meds.length > 0 ? (
           today.meds.map((m: Med, i: number) => (
@@ -170,7 +198,6 @@ export default function MainCard({
               <div>
                 <strong>{m.name}</strong> — {m.dose}
               </div>
-
               <Flex spaceX="space-x-2" alignItems="items-center">
                 <span className="text-sm text-gray-500">{m.time}</span>
                 <Button
@@ -183,9 +210,9 @@ export default function MainCard({
             </div>
           ))
         ) : (
-          <Text>Nenhum remédio adicionado hoje.</Text>
+          <Text color="gray">Nenhum remédio adicionado hoje.</Text>
         )}
       </div>
-    </Card>
+    </>
   );
 }

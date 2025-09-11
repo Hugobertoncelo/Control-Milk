@@ -23,19 +23,26 @@ import {
 
 import { GrLineChart } from "react-icons/gr";
 
+interface ChartProps extends CardProps {
+  goal: number; // meta diária dinâmica
+}
+
 export default function Chart({
+  goal,
   update = 0,
   onUpdate = () => {},
   onAction = () => {},
-}: CardProps) {
-  const { goal, chart } = getSettings();
+}: ChartProps) {
+  // pega o valor inicial do chart (quantos dias mostrar)
+  const { chart } = getSettings();
 
   const [days, setDays] = useState<number>(chart);
   const [data, setData] = useState<DataSet>([]);
 
   useEffect(() => {
+    // preenche os dados do gráfico
     setData(days > 0 ? getFillDataSet(days) : getDataSet());
-    saveSettings({ chart: days });
+    saveSettings({ chart: days }); // salva a quantidade de dias no settings
   }, [days, update]);
 
   function reset() {
@@ -50,6 +57,7 @@ export default function Chart({
 
   return (
     <>
+      {/* Dropdown para selecionar quantidade de dias */}
       <Dropdown defaultValue={days} handleSelect={setDays} icon={GrLineChart}>
         <DropdownItem text="Últimos três dias" value={3} />
         <DropdownItem text="Últimos sete dias" value={7} />
@@ -58,6 +66,7 @@ export default function Chart({
         <DropdownItem text="Dias com informação" value={-1} />
       </Dropdown>
 
+      {/* Gráfico de Área */}
       <AreaChart
         marginTop="mt-4"
         categories={["Objetivo", "Ingerido"]}
@@ -68,7 +77,7 @@ export default function Chart({
             data.length < 10
               ? dayWeek(day.date).substring(0, 3)
               : day.date.replace(/^.*?(\d{1,2}$)/, "$1"),
-          Objetivo: goal,
+          Objetivo: goal, // usa a meta dinâmica
           Ingerido: sum(day),
         }))}
         valueFormatter={(v) => `${v.toLocaleString()} ml`}
@@ -76,7 +85,7 @@ export default function Chart({
 
       <Divider />
 
-      <Flex justifyContent="justify-center">
+      <Flex justifyContent="justify-center" marginTop="mt-4">
         <Button text="Resetar Informações" onClick={reset} />
       </Flex>
     </>
