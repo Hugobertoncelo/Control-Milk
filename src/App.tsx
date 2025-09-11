@@ -1,22 +1,24 @@
 import type { ActionData } from "./support/types";
-
 import { Card, Title, Text, ColGrid } from "@tremor/react";
-
 import { Main, Data, Chart } from "./cards";
-
-import { useState } from "react";
-
+import { useState, useEffect } from "react";
 import Modals from "./modals";
 import Footer from "./Footer";
+import MedicineList from "./cards/MedicineList";
+import { getDay, getDataSet } from "./support/data";
 
 export default function Dashboard() {
   const classSection = "bg-blue-100 m-0 px-6 sm:px-12 md:px-18 lg:px-24";
 
   const [update, setUpdate] = useState<number>(0);
   const [action, setAction] = useState<ActionData>();
-
-  // Estado para meta diária
   const [dailyGoalValue, setDailyGoalValue] = useState<number>(150);
+  const [todayMeds, setTodayMeds] = useState(getDay().meds ?? []);
+
+  // Atualiza todayMeds sempre que update mudar
+  useEffect(() => {
+    setTodayMeds(getDay().meds ?? []);
+  }, [update]);
 
   return (
     <>
@@ -40,10 +42,10 @@ export default function Dashboard() {
           <Card shadow>
             <Main
               update={update}
-              dailyGoal={dailyGoalValue} // passa a meta para o MainCard
+              dailyGoal={dailyGoalValue}
               onUpdate={() => setUpdate((update) => update + 1)}
               onAction={(type, payload) => setAction({ type, payload })}
-              setDailyGoal={setDailyGoalValue} // função para atualizar a meta
+              setDailyGoal={setDailyGoalValue}
             />
           </Card>
 
@@ -59,15 +61,30 @@ export default function Dashboard() {
         <Card marginTop="mt-8" shadow>
           <Chart
             update={update}
-            goal={dailyGoalValue} // passa a meta para o gráfico
+            goal={dailyGoalValue}
             onUpdate={() => setUpdate((update) => update + 1)}
             onAction={(type, payload) => setAction({ type, payload })}
           />
         </Card>
+
+        {/* Painel de Remédios */}
+        <MedicineList
+          meds={todayMeds}
+          onRemove={(index: number) => {
+            const dataset = getDataSet();
+            const date = new Date().toISOString().slice(0, 10);
+            const day = dataset.find((d) => d.date === date);
+            if (!day || !day.meds) return;
+
+            day.meds.splice(index, 1); // remove o remédio
+            localStorage.setItem("dataset", JSON.stringify(dataset));
+
+            setUpdate((u) => u + 1); // força atualização e atualiza todayMeds via useEffect
+          }}
+        />
       </main>
 
       <Footer />
-
       <Modals action={action} />
     </>
   );
