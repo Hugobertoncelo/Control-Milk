@@ -63,4 +63,5 @@ export type Med = {
   name: string;
   dose: string;
   time?: string;
+  date: DateString;
 };

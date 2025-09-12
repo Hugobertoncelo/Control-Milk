@@ -15,7 +15,6 @@ export default function Dashboard() {
   const [dailyGoalValue, setDailyGoalValue] = useState<number>(150);
   const [todayMeds, setTodayMeds] = useState(getDay().meds ?? []);
 
-  // Atualiza todayMeds sempre que update mudar
   useEffect(() => {
     setTodayMeds(getDay().meds ?? []);
   }, [update]);
@@ -67,7 +66,6 @@ export default function Dashboard() {
           />
         </Card>
 
-        {/* Painel de Remédios */}
         <MedicineList
           meds={todayMeds}
           onRemove={(index: number) => {
@@ -76,10 +74,10 @@ export default function Dashboard() {
             const day = dataset.find((d) => d.date === date);
             if (!day || !day.meds) return;
 
-            day.meds.splice(index, 1); // remove o remédio
+            day.meds.splice(index, 1);
             localStorage.setItem("dataset", JSON.stringify(dataset));
 
-            setUpdate((u) => u + 1); // força atualização e atualiza todayMeds via useEffect
+            setUpdate((u) => u + 1);
           }}
         />
       </main>

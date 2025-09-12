@@ -12,7 +12,8 @@ import {
 
 import { getDay, getDataSet, insert } from "../support/data";
 import { formatDateString } from "../support/helpers";
-import type { Day, Insertion, Med } from "../support/types";
+import type { Day, Insertion } from "../support/types";
+import type { Med, DateString } from "../support/types";
 
 interface MainProps {
   update?: number;
@@ -58,22 +59,29 @@ export default function Main({
   function addMed(e: FormEvent) {
     e.preventDefault();
     const dataset = getDataSet();
-    const date: string = formatDateString(new Date());
+    const date: DateString = formatDateString(new Date()) as DateString;
+
     let day = dataset.find((d: Day) => d.date === date);
     if (!day) {
       day = {
-        date: date as `${number}-${number}-${number}`,
+        date,
         data: [],
         meds: [],
       };
       dataset.push(day);
     }
     if (!Array.isArray(day.meds)) day.meds = [];
+
     day.meds.push({
       name: medName.trim(),
       dose: medDose.trim(),
-      time: new Date().toLocaleTimeString().slice(0, 5),
+      time: new Date().toLocaleTimeString("pt-BR", {
+        hour: "2-digit",
+        minute: "2-digit",
+      }),
+      date, // agora salva a data também
     });
+
     localStorage.setItem("dataset", JSON.stringify(dataset));
     setMedName("");
     setMedDose("");

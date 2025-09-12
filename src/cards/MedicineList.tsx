@@ -1,5 +1,5 @@
 import React from "react";
-import { Card, Title, Flex, Button } from "@tremor/react";
+import { Card, Title, Button } from "@tremor/react";
 import type { Med } from "../support/types";
 import { FaPills, FaCapsules, FaAppleAlt, FaHeartbeat } from "react-icons/fa";
 
@@ -9,36 +9,35 @@ interface MedicineListProps {
 }
 
 export default function MedicineList({ meds, onRemove }: MedicineListProps) {
-  const getStyle = (name: string) => {
-    switch (name.toLowerCase()) {
-      case "paracetamol":
-        return {
-          color: "bg-yellow-100",
-          icon: <FaPills className="text-yellow-600" />,
-        };
-      case "ibuprofeno":
-        return {
-          color: "bg-red-100",
-          icon: <FaCapsules className="text-red-600" />,
-        };
-      case "simeticona":
-        return {
-          color: "bg-green-100",
-          icon: <FaCapsules className="text-green-600" />,
-        };
-      case "vitamina c":
-        return {
-          color: "bg-orange-100",
-          icon: <FaAppleAlt className="text-orange-600" />,
-        };
-      default:
-        return {
-          color: "bg-gray-100",
-          icon: <FaHeartbeat className="text-gray-600" />,
-        };
+  function getStyle(name: string) {
+    // Simple mapping based on medicine name keywords
+    const lower = name.toLowerCase();
+    if (lower.includes("vitamina") || lower.includes("vitamin")) {
+      return {
+        color: "bg-green-100",
+        icon: <FaAppleAlt className="text-green-600" />,
+      };
     }
-  };
+    if (lower.includes("cápsula") || lower.includes("capsule")) {
+      return {
+        color: "bg-purple-100",
+        icon: <FaCapsules className="text-purple-600" />,
+      };
+    }
+    if (lower.includes("coração") || lower.includes("heart")) {
+      return {
+        color: "bg-pink-100",
+        icon: <FaHeartbeat className="text-pink-600" />,
+      };
+    }
+    // Default: pills
+    return {
+      color: "bg-blue-100",
+      icon: <FaPills className="text-blue-600" />,
+    };
+  }
 
+  // ...
   return (
     <Card marginTop="mt-8" shadow>
       <Title>💊 Remédios Ingeridos</Title>
@@ -47,6 +46,7 @@ export default function MedicineList({ meds, onRemove }: MedicineListProps) {
         <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
           {meds.map((m, i) => {
             const style = getStyle(m.name);
+
             return (
               <div
                 key={i}
@@ -68,7 +68,7 @@ export default function MedicineList({ meds, onRemove }: MedicineListProps) {
                   />
                 </div>
                 <div className="text-gray-500 mt-2 text-right text-sm">
-                  {m.time}
+                  {new Date(m.date).toLocaleDateString("pt-BR")} {m.time}
                 </div>
               </div>
             );
