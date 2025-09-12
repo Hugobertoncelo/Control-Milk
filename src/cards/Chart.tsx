@@ -24,7 +24,7 @@ import {
 import { GrLineChart } from "react-icons/gr";
 
 interface ChartProps extends CardProps {
-  goal: number; // meta diária dinâmica
+  goal: number;
 }
 
 export default function Chart({
@@ -33,16 +33,14 @@ export default function Chart({
   onUpdate = () => {},
   onAction = () => {},
 }: ChartProps) {
-  // pega o valor inicial do chart (quantos dias mostrar)
   const { chart } = getSettings();
 
   const [days, setDays] = useState<number>(chart);
   const [data, setData] = useState<DataSet>([]);
 
   useEffect(() => {
-    // preenche os dados do gráfico
     setData(days > 0 ? getFillDataSet(days) : getDataSet());
-    saveSettings({ chart: days }); // salva a quantidade de dias no settings
+    saveSettings({ chart: days });
   }, [days, update]);
 
   function reset() {
@@ -57,7 +55,6 @@ export default function Chart({
 
   return (
     <>
-      {/* Dropdown para selecionar quantidade de dias */}
       <Dropdown defaultValue={days} handleSelect={setDays} icon={GrLineChart}>
         <DropdownItem text="Últimos três dias" value={3} />
         <DropdownItem text="Últimos sete dias" value={7} />
@@ -66,7 +63,6 @@ export default function Chart({
         <DropdownItem text="Dias com informação" value={-1} />
       </Dropdown>
 
-      {/* Gráfico de Área */}
       <AreaChart
         marginTop="mt-4"
         categories={["Objetivo", "Ingerido"]}
@@ -77,7 +73,7 @@ export default function Chart({
             data.length < 10
               ? dayWeek(day.date).substring(0, 3)
               : day.date.replace(/^.*?(\d{1,2}$)/, "$1"),
-          Objetivo: goal, // usa a meta dinâmica
+          Objetivo: goal,
           Ingerido: sum(day),
         }))}
         valueFormatter={(v) => `${v.toLocaleString()} ml`}

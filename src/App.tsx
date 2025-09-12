@@ -4,7 +4,6 @@ import { Main, Data, Chart } from "./cards";
 import { useState, useEffect } from "react";
 import Modals from "./modals";
 import Footer from "./Footer";
-import MedicineList from "./cards/MedicineList";
 import { getDay, getDataSet } from "./support/data";
 
 export default function Dashboard() {

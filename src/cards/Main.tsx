@@ -10,7 +10,7 @@ import {
   Text,
 } from "@tremor/react";
 
-import MedicineList from "./MedicineList"; // ajuste o caminho se necessário
+import MedicineList from "./MedicineList";
 import { getDay, getDataSet, insert } from "../support/data";
 import { formatDateString } from "../support/helpers";
 import type { Day, Insertion, Med, DateString } from "../support/types";
@@ -34,7 +34,7 @@ export default function Main({
   const [medName, setMedName] = useState("");
   const [medDose, setMedDose] = useState("");
   const [customMl, setCustomMl] = useState("");
-  const [, setRefresh] = useState(0); // usado para forçar re-render se onUpdate não existir
+  const [, setRefresh] = useState(0);
 
   const today: Day = getDay();
 
@@ -91,7 +91,6 @@ export default function Main({
     setRefresh((r) => r + 1);
   }
 
-  // --- nova função: remove o remédio pelo índice (o índice vem do MedicineList)
   function removeMed(index: number) {
     try {
       const dataset = getDataSet();
@@ -102,13 +101,10 @@ export default function Main({
 
       if (index < 0 || index >= day.meds.length) return;
 
-      // remove o item do array
       day.meds.splice(index, 1);
 
-      // persiste
       localStorage.setItem("dataset", JSON.stringify(dataset));
 
-      // notifica pai / força re-render do componente
       onUpdate?.();
       setRefresh((r) => r + 1);
     } catch (err) {

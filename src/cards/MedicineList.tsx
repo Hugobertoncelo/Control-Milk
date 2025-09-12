@@ -29,7 +29,7 @@ export default function MedicineList({ meds, onRemove }: MedicineListProps) {
         icon: <FaHeartbeat className="text-pink-600" />,
       };
     }
-    // Default: pills
+
     return {
       color: "bg-blue-100",
       icon: <FaPills className="text-blue-600" />,
