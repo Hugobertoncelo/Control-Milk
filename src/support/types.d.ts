@@ -48,10 +48,17 @@ export type DataSet = Day[];
 
 export type DateString = `${number}-${number}-${number}`;
 
+export type Diaper = {
+  type: string;
+  time: string;
+  date: DateString;
+};
+
 export type Day = {
   date: DateString;
   data: Insertion[];
   meds: Med[];
+  diapers: Diaper[];
 };
 
 export type Insertion = {

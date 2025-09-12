@@ -4,6 +4,7 @@ import type {
   DateString,
   Day,
   Med,
+  Diaper,
 } from "../support/types";
 
 import {
@@ -19,6 +20,7 @@ import { useState, useEffect } from "react";
 
 import { CgGlassAlt, CgCalendar } from "react-icons/cg";
 import { FaPills, FaCapsules, FaAppleAlt, FaHeartbeat } from "react-icons/fa";
+import { FaBaby } from "react-icons/fa";
 
 import { getDataSet, getDay, getSettings } from "../support/data";
 
@@ -38,7 +40,6 @@ export default function Data({ update = 0 }: CardProps) {
     if (day && day.data.length === 0) setDate(undefined);
   }, [update]);
 
-  // função para mapear ícones e cores dos remédios
   const getStyle = (name: string) => {
     const lower = name.toLowerCase();
     if (lower.includes("vitamina") || lower.includes("vitamin")) {
@@ -76,6 +77,7 @@ export default function Data({ update = 0 }: CardProps) {
       <Block marginTop="mt-4">
         {day ? (
           <>
+            {/* ======= Leite ======= */}
             <Callout
               title={
                 goal > sumDay
@@ -84,11 +86,11 @@ export default function Data({ update = 0 }: CardProps) {
               }
               color={goal > sumDay ? "red" : "green"}
               text={`
-                        Neste dia você tomou ${sumDay.toLocaleString()} ml de leite.
-                        São ${natural(sumDay - goal).toLocaleString()} ml a
-                        ${goal > sumDay ? "menos" : "mais"} do que
-                        seu objetivo diário de ${goal.toLocaleString()} ml.
-                    `}
+                Neste dia você tomou ${sumDay.toLocaleString()} ml de leite.
+                São ${natural(sumDay - goal).toLocaleString()} ml a
+                ${goal > sumDay ? "menos" : "mais"} do que
+                seu objetivo diário de ${goal.toLocaleString()} ml.
+              `}
             />
 
             <BarList
@@ -103,22 +105,31 @@ export default function Data({ update = 0 }: CardProps) {
               showAnimation
             />
 
+            {/* Remédios */}
             {day.meds && day.meds.length > 0 && (
               <div className="mt-6">
                 <Title>💊 Remédios Tomados</Title>
                 <div className="mt-2 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
                   {day.meds.map((m: Med, i: number) => {
-                    const style = getStyle(m.name);
                     return (
                       <div
                         key={i}
                         className="p-3 rounded shadow flex flex-col justify-between bg-blue-50"
                       >
                         <div className="flex items-center space-x-2">
-                          {style.icon}
-                          <div className={`font-bold ${style.color}`}>
-                            {m.name}
-                          </div>
+                          <span className="text-blue-600">
+                            {(() => {
+                              const lower = m.name.toLowerCase();
+                              if (lower.includes("vitamina"))
+                                return <FaAppleAlt />;
+                              if (lower.includes("cápsula"))
+                                return <FaCapsules />;
+                              if (lower.includes("coração"))
+                                return <FaHeartbeat />;
+                              return <FaPills />;
+                            })()}
+                          </span>
+                          <div className="font-bold text-black">{m.name}</div>
                         </div>
                         <div className="text-gray-500 mt-1 text-sm">
                           {m.dose} - {m.time}
@@ -126,6 +137,27 @@ export default function Data({ update = 0 }: CardProps) {
                       </div>
                     );
                   })}
+                </div>
+              </div>
+            )}
+
+            {/* ======= Fraldas ======= */}
+            {day.diapers && day.diapers.length > 0 && (
+              <div className="mt-6">
+                <Title>👶 Fraldas Trocadas</Title>
+                <div className="mt-2 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+                  {day.diapers.map((d: Diaper, i: number) => (
+                    <div
+                      key={i}
+                      className="p-3 rounded shadow flex flex-col justify-between bg-blue-50"
+                    >
+                      <div className="flex items-center space-x-2">
+                        <FaBaby className="text-blue-600" />
+                        <div className="font-bold">{d.type}</div>
+                      </div>
+                      <div className="text-gray-500 mt-1 text-sm">{d.time}</div>
+                    </div>
+                  ))}
                 </div>
               </div>
             )}
