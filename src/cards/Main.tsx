@@ -10,10 +10,10 @@ import {
   Text,
 } from "@tremor/react";
 
+import MedicineList from "./MedicineList"; // ajuste o caminho se necessário
 import { getDay, getDataSet, insert } from "../support/data";
 import { formatDateString } from "../support/helpers";
-import type { Day, Insertion } from "../support/types";
-import type { Med, DateString } from "../support/types";
+import type { Day, Insertion, Med, DateString } from "../support/types";
 
 interface MainProps {
   update?: number;
@@ -34,6 +34,7 @@ export default function Main({
   const [medName, setMedName] = useState("");
   const [medDose, setMedDose] = useState("");
   const [customMl, setCustomMl] = useState("");
+  const [, setRefresh] = useState(0); // usado para forçar re-render se onUpdate não existir
 
   const today: Day = getDay();
 
@@ -51,6 +52,7 @@ export default function Main({
       insert(value);
       onUpdate?.();
       setCustomMl("");
+      setRefresh((r) => r + 1);
     } finally {
       setTimeout(() => setWait(false), 300);
     }
@@ -79,13 +81,39 @@ export default function Main({
         hour: "2-digit",
         minute: "2-digit",
       }),
-      date, // agora salva a data também
+      date,
     });
 
     localStorage.setItem("dataset", JSON.stringify(dataset));
     setMedName("");
     setMedDose("");
     onUpdate?.();
+    setRefresh((r) => r + 1);
+  }
+
+  // --- nova função: remove o remédio pelo índice (o índice vem do MedicineList)
+  function removeMed(index: number) {
+    try {
+      const dataset = getDataSet();
+      const date: DateString = formatDateString(new Date()) as DateString;
+      const day = dataset.find((d: Day) => d.date === date);
+
+      if (!day || !Array.isArray(day.meds)) return;
+
+      if (index < 0 || index >= day.meds.length) return;
+
+      // remove o item do array
+      day.meds.splice(index, 1);
+
+      // persiste
+      localStorage.setItem("dataset", JSON.stringify(dataset));
+
+      // notifica pai / força re-render do componente
+      onUpdate?.();
+      setRefresh((r) => r + 1);
+    } catch (err) {
+      console.error("Erro ao remover med:", err);
+    }
   }
 
   return (
@@ -180,6 +208,8 @@ export default function Main({
           />
         </Flex>
       </form>
+
+      <MedicineList meds={today.meds ?? []} onRemove={removeMed} />
     </Card>
   );
 }

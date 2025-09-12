@@ -12,7 +12,7 @@ export default function Dashboard() {
 
   const [update, setUpdate] = useState<number>(0);
   const [action, setAction] = useState<ActionData>();
-  const [dailyGoalValue, setDailyGoalValue] = useState<number>(150);
+  const [dailyGoalValue, setDailyGoalValue] = useState<number>(600);
   const [todayMeds, setTodayMeds] = useState(getDay().meds ?? []);
 
   useEffect(() => {
@@ -65,21 +65,6 @@ export default function Dashboard() {
             onAction={(type, payload) => setAction({ type, payload })}
           />
         </Card>
-
-        <MedicineList
-          meds={todayMeds}
-          onRemove={(index: number) => {
-            const dataset = getDataSet();
-            const date = new Date().toISOString().slice(0, 10);
-            const day = dataset.find((d) => d.date === date);
-            if (!day || !day.meds) return;
-
-            day.meds.splice(index, 1);
-            localStorage.setItem("dataset", JSON.stringify(dataset));
-
-            setUpdate((u) => u + 1);
-          }}
-        />
       </main>
 
       <Footer />

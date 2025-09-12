@@ -1,5 +1,5 @@
 import React from "react";
-import { Card, Title, Button } from "@tremor/react";
+import { Card, Title } from "@tremor/react";
 import type { Med } from "../support/types";
 import { FaPills, FaCapsules, FaAppleAlt, FaHeartbeat } from "react-icons/fa";
 
@@ -10,7 +10,6 @@ interface MedicineListProps {
 
 export default function MedicineList({ meds, onRemove }: MedicineListProps) {
   function getStyle(name: string) {
-    // Simple mapping based on medicine name keywords
     const lower = name.toLowerCase();
     if (lower.includes("vitamina") || lower.includes("vitamin")) {
       return {
@@ -37,20 +36,19 @@ export default function MedicineList({ meds, onRemove }: MedicineListProps) {
     };
   }
 
-  // ...
   return (
     <Card marginTop="mt-8" shadow>
       <Title>💊 Remédios Ingeridos</Title>
 
       {meds.length > 0 ? (
-        <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+        <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 gap-4">
           {meds.map((m, i) => {
             const style = getStyle(m.name);
 
             return (
               <div
                 key={i}
-                className={`${style.color} p-4 rounded shadow flex flex-col justify-between`}
+                className={`${style.color} p-3 rounded shadow flex flex-col justify-between`}
               >
                 <div className="flex justify-between items-start">
                   <div className="flex items-center space-x-2">
@@ -60,13 +58,15 @@ export default function MedicineList({ meds, onRemove }: MedicineListProps) {
                       <div>{m.dose}</div>
                     </div>
                   </div>
-                  <Button
-                    text="X"
-                    color="red"
-                    size="xs"
+
+                  <button
+                    className="ml-2 rounded-full px-3 py-1 bg-red-500 text-white text-sm hover:bg-red-600"
                     onClick={() => onRemove(i)}
-                  />
+                  >
+                    X
+                  </button>
                 </div>
+
                 <div className="text-gray-500 mt-2 text-right text-sm">
                   {new Date(m.date).toLocaleDateString("pt-BR")} {m.time}
                 </div>
