@@ -1,4 +1,3 @@
-// src/services/db.ts
 import { db } from "../firebase";
 import { doc, setDoc, getDoc, onSnapshot, updateDoc } from "firebase/firestore";
 
