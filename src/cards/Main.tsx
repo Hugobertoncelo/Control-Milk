@@ -1,5 +1,6 @@
 import React from "react";
 import { Card, Title } from "@tremor/react";
+import type { Med, Registro } from "../services/db";
 
 import MilkControl from "./MilkControl";
 import MedicineSection from "./MedicineSection";
@@ -11,6 +12,11 @@ interface MainProps {
   onAction?: (type: any, payload?: any) => void;
   dailyGoal?: number;
   setDailyGoal?: React.Dispatch<React.SetStateAction<number>>;
+
+  meds?: Med[];
+  registros?: Registro[];
+  onAddMed?: (med: Med) => void;
+  onAddRegistro?: (reg: Registro) => void;
 }
 
 export default function Main({
@@ -19,6 +25,10 @@ export default function Main({
   onAction,
   dailyGoal = 150,
   setDailyGoal,
+  meds,
+  registros,
+  onAddMed,
+  onAddRegistro,
 }: MainProps) {
   return (
     <Card shadow>

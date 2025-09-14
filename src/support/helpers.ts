@@ -48,3 +48,8 @@ export function getDateByDays(
 export function natural(n: number): number {
   return Math.abs(n);
 }
+
+// ✅ adiciona aqui:
+export function getTodayDate(): DateString {
+  return formatDateString(new Date());
+}

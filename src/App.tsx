@@ -1,22 +1,51 @@
-import type { ActionData } from "./support/types";
-import { Card, Title, Text, ColGrid } from "@tremor/react";
+import { useEffect, useState } from "react";
 import { Main, Data, Chart } from "./cards";
-import { useState, useEffect } from "react";
+import { Card, ColGrid, Title, Text } from "@tremor/react";
 import Modals from "./modals";
 import Footer from "./Footer";
-import { getDay, getDataSet } from "./support/data";
+import type { ActionData } from "./support/types";
+import {
+  ouvirMetaDiaria,
+  salvarMetaDiaria,
+  ouvirDia,
+  atualizarDia,
+  Dia,
+  Med,
+  Registro,
+} from "./services/db";
+import { getTodayDate } from "./support/helpers";
 
-export default function Dashboard() {
+export default function App() {
   const classSection = "bg-blue-100 m-0 px-6 sm:px-12 md:px-18 lg:px-24";
 
   const [update, setUpdate] = useState<number>(0);
   const [action, setAction] = useState<ActionData>();
   const [dailyGoalValue, setDailyGoalValue] = useState<number>(600);
-  const [todayMeds, setTodayMeds] = useState(getDay().meds ?? []);
+  const [today, setToday] = useState<Dia>({ meds: [], data: [] });
+
+  const todayDate = getTodayDate();
 
   useEffect(() => {
-    setTodayMeds(getDay().meds ?? []);
-  }, [update]);
+    const unsub = ouvirMetaDiaria((valor) => setDailyGoalValue(valor));
+    return () => unsub();
+  }, []);
+
+  useEffect(() => {
+    salvarMetaDiaria(dailyGoalValue);
+  }, [dailyGoalValue]);
+
+  useEffect(() => {
+    const unsub = ouvirDia(todayDate, (dia) => setToday(dia));
+    return () => unsub();
+  }, [todayDate]);
+
+  function handleAddMed(med: Med) {
+    atualizarDia(todayDate, { meds: [...today.meds, med] });
+  }
+
+  function handleAddRegistro(reg: Registro) {
+    atualizarDia(todayDate, { data: [...today.data, reg] });
+  }
 
   return (
     <>
@@ -41,9 +70,13 @@ export default function Dashboard() {
             <Main
               update={update}
               dailyGoal={dailyGoalValue}
+              setDailyGoal={setDailyGoalValue}
+              meds={today.meds}
+              registros={today.data}
+              onAddMed={handleAddMed}
+              onAddRegistro={handleAddRegistro}
               onUpdate={() => setUpdate((update) => update + 1)}
               onAction={(type, payload) => setAction({ type, payload })}
-              setDailyGoal={setDailyGoalValue}
             />
           </Card>
 
