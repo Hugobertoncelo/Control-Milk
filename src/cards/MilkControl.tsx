@@ -9,6 +9,7 @@ import {
 } from "@tremor/react";
 import { getDay, insert } from "../support/data";
 import type { Day, Insertion } from "../support/types";
+import { salvarMetaDiaria } from "../services/db";
 
 interface MilkControlProps {
   dailyGoal: number;
@@ -56,6 +57,7 @@ export default function MilkControl({
           onChange={(e: ChangeEvent<HTMLInputElement>) => {
             const value = Number(e.currentTarget.value.replace(/\D/g, ""));
             setDailyGoal?.(value);
+            salvarMetaDiaria(value);
           }}
           maxWidth="max-w-xs"
         />

@@ -6,7 +6,6 @@ import Footer from "./Footer";
 import type { ActionData } from "./support/types";
 import {
   ouvirMetaDiaria,
-  salvarMetaDiaria,
   ouvirDia,
   atualizarDia,
   Dia,
@@ -29,10 +28,6 @@ export default function App() {
     const unsub = ouvirMetaDiaria((valor) => setDailyGoalValue(valor));
     return () => unsub();
   }, []);
-
-  useEffect(() => {
-    salvarMetaDiaria(dailyGoalValue);
-  }, [dailyGoalValue]);
 
   useEffect(() => {
     const unsub = ouvirDia(todayDate, (dia) => setToday(dia));
