@@ -1,13 +1,21 @@
+const express = require('express');
+const path = require('path');
 const jsonServer = require('json-server');
-const server = jsonServer.create();
+
+const app = express();
 const router = jsonServer.router('db.json');
 const middlewares = jsonServer.defaults();
 
-server.use(middlewares);
+// Rotas da API
+app.use('/api', middlewares, router);
 
-const PORT = process.env.PORT || 3001;
-server.use(router);
+// Serve o React build
+app.use(express.static(path.join(__dirname, 'build')));
 
-server.listen(PORT, () => {
-  console.log(`JSON Server running on port ${PORT}`);
+// Para qualquer outra rota, retorna index.html (React Router)
+app.get('*', (req, res) => {
+  res.sendFile(path.join(__dirname, 'build', 'index.html'));
 });
+
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
