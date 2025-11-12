@@ -8,6 +8,8 @@ interface ChartProps {
   goal: number;
 }
 
+const API_URL = process.env.REACT_APP_API_URL;
+
 export default function Chart({ update = 0, goal }: ChartProps) {
   const [milks, setMilks] = useState<any[]>([]);
   const [total, setTotal] = useState(0);
@@ -45,23 +47,22 @@ export default function Chart({ update = 0, goal }: ChartProps) {
         getMedicines(),
       ]);
 
-      for (const milk of allMilks) {
-        await fetch(`${process.env.REACT_APP_API_URL}/milks/${milk.id}`, {
-          method: "DELETE",
-        });
-      }
+      const deleteAll = async (items: any[], endpoint: string) => {
+        for (const item of items) {
+          const res = await fetch(`${API_URL}/${endpoint}/${item.id}`, {
+            method: "DELETE",
+          });
+          if (!res.ok) {
+            console.warn(`Falha ao deletar ${endpoint} id=${item.id}`);
+          }
+        }
+      };
 
-      for (const diaper of allDiapers) {
-        await fetch(`${process.env.REACT_APP_API_URL}/diapers/${diaper.id}`, {
-          method: "DELETE",
-        });
-      }
-
-      for (const med of allMeds) {
-        await fetch(`${process.env.REACT_APP_API_URL}/medicines/${med.id}`, {
-          method: "DELETE",
-        });
-      }
+      await Promise.all([
+        deleteAll(allMilks, "milks"),
+        deleteAll(allDiapers, "diapers"),
+        deleteAll(allMeds, "medicines"),
+      ]);
 
       window.location.reload();
     } catch (err) {
