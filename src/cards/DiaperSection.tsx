@@ -7,6 +7,8 @@ interface DiaperSectionProps {
   onUpdate?: () => void;
 }
 
+const API_URL = process.env.REACT_APP_API_URL || "/api";
+
 export default function DiaperSection({ onUpdate }: DiaperSectionProps) {
   const [diaperType, setDiaperType] = useState("");
   const [diapers, setDiapers] = useState<any[]>([]);
@@ -52,7 +54,8 @@ export default function DiaperSection({ onUpdate }: DiaperSectionProps) {
 
   async function removeDiaper(id: string) {
     try {
-      await fetch(`/api/diapers/${id}`, { method: "DELETE" });
+      const res = await fetch(`${API_URL}/diapers/${id}`, { method: "DELETE" });
+      if (!res.ok) throw new Error("Falha ao deletar fralda");
       setRefresh((r) => r + 1);
       onUpdate?.();
     } catch (err) {

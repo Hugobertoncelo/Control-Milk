@@ -1,14 +1,12 @@
 import React, { useState, useEffect } from "react";
 import { Card, Title, Button, Divider } from "@tremor/react";
 import { AreaChart } from "@tremor/react";
-import { getMilks } from "../services/db";
+import { getMilks, getFraldas, getMedicines } from "../services/db";
 
 interface ChartProps {
   update?: number;
   goal: number;
 }
-
-const API_URL = "/api";
 
 export default function Chart({ update = 0, goal }: ChartProps) {
   const [milks, setMilks] = useState<any[]>([]);
@@ -16,11 +14,15 @@ export default function Chart({ update = 0, goal }: ChartProps) {
 
   useEffect(() => {
     async function fetchData() {
-      const data = await getMilks();
-      setMilks(data);
-      setTotal(
-        data.reduce((acc: number, d: any) => acc + (d?.quantidade ?? 0), 0)
-      );
+      try {
+        const data = await getMilks();
+        setMilks(data);
+        setTotal(
+          data.reduce((acc: number, d: any) => acc + (d?.quantidade ?? 0), 0)
+        );
+      } catch (err) {
+        console.error("Erro ao carregar leite:", err);
+      }
     }
     fetchData();
   }, [update]);
@@ -35,12 +37,45 @@ export default function Chart({ update = 0, goal }: ChartProps) {
     };
   });
 
+  async function resetData() {
+    try {
+      const [allMilks, allDiapers, allMeds] = await Promise.all([
+        getMilks(),
+        getFraldas(),
+        getMedicines(),
+      ]);
+
+      for (const milk of allMilks) {
+        await fetch(`${process.env.REACT_APP_API_URL}/milks/${milk.id}`, {
+          method: "DELETE",
+        });
+      }
+
+      for (const diaper of allDiapers) {
+        await fetch(`${process.env.REACT_APP_API_URL}/diapers/${diaper.id}`, {
+          method: "DELETE",
+        });
+      }
+
+      for (const med of allMeds) {
+        await fetch(`${process.env.REACT_APP_API_URL}/medicines/${med.id}`, {
+          method: "DELETE",
+        });
+      }
+
+      window.location.reload();
+    } catch (err) {
+      console.error("Erro ao resetar dados:", err);
+    }
+  }
+
   return (
     <Card marginTop="mt-8" shadow>
       <Title>📈 Gráfico de Leite</Title>
       <div className="mt-4">
         <div>Meta diária: {goal} ml</div>
         <div>Total ingerido: {total} ml</div>
+
         <AreaChart
           data={chartData}
           categories={["Objetivo", "Ingerido"]}
@@ -49,42 +84,11 @@ export default function Chart({ update = 0, goal }: ChartProps) {
           valueFormatter={(v) => `${v} ml`}
           yAxisWidth="w-16"
         />
+
         <Divider />
+
         <div className="flex justify-center mt-4">
-          <Button
-            text="Resetar Informações"
-            color="blue"
-            onClick={async () => {
-              const milks = await fetch(`${API_URL}/milks`).then((r) =>
-                r.json()
-              );
-              for (const milk of milks) {
-                await fetch(`${API_URL}/milks/${milk.id}`, {
-                  method: "DELETE",
-                });
-              }
-
-              const diapers = await fetch(`${API_URL}/diapers`).then((r) =>
-                r.json()
-              );
-              for (const diaper of diapers) {
-                await fetch(`${API_URL}/diapers/${diaper.id}`, {
-                  method: "DELETE",
-                });
-              }
-
-              const medicines = await fetch(`${API_URL}/medicines`).then((r) =>
-                r.json()
-              );
-              for (const med of medicines) {
-                await fetch(`${API_URL}/medicines/${med.id}`, {
-                  method: "DELETE",
-                });
-              }
-
-              window.location.reload();
-            }}
-          />
+          <Button text="Resetar Informações" color="blue" onClick={resetData} />
         </div>
       </div>
     </Card>

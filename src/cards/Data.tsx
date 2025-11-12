@@ -4,6 +4,7 @@ import {
   getMilksByDate,
   getMedicinesByDate,
   getDiapersByDate,
+  getMilks,
 } from "../services/db";
 
 function formatDate(date: Date) {
@@ -14,8 +15,6 @@ export interface DataProps {
   update?: number;
 }
 
-const API_URL = "/api";
-
 export default function Data({ update }: DataProps) {
   const [date, setDate] = useState(formatDate(new Date()));
   const [milks, setMilks] = useState<any[]>([]);
@@ -25,8 +24,7 @@ export default function Data({ update }: DataProps) {
 
   async function fetchDates() {
     try {
-      const res = await fetch(`${API_URL}/milks`);
-      const all: any[] = await res.json();
+      const all: any[] = await getMilks();
       const uniqueDates = Array.from(new Set(all.map((m) => m.date))).filter(
         Boolean
       );
