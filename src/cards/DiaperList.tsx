@@ -1,50 +1,50 @@
 import React from "react";
-import { Card, Title, Button } from "@tremor/react";
-import type { Diaper } from "../support/types";
-import { FaBaby } from "react-icons/fa";
+import { Card, Flex, Button, Text } from "@tremor/react";
+import { X } from "lucide-react";
 
 interface DiaperListProps {
-  diapers: Diaper[];
-  onRemove: (index: number) => void;
+  diapers: {
+    id: string;
+    hora: string;
+    tipo: string;
+    date: string;
+  }[];
+  onRemove: (id: string) => void;
 }
 
 export default function DiaperList({ diapers, onRemove }: DiaperListProps) {
-  return (
-    <Card marginTop="mt-8" shadow>
-      <Title>👶 Fraldas Trocadas</Title>
+  if (!diapers || diapers.length === 0) {
+    // Tremor não aceita className aqui, então usamos um <p>
+    return (
+      <p className="text-gray-500 mt-2 text-sm">
+        Nenhuma fralda registrada ainda.
+      </p>
+    );
+  }
 
-      {diapers.length > 0 ? (
-        <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-          {diapers.map((d, i) => (
-            <div
-              key={i}
-              className="p-3 rounded shadow flex flex-col justify-between bg-blue-100"
-            >
-              <div className="flex justify-between items-center">
-                <div className="flex items-center space-x-2">
-                  <FaBaby className="text-blue-600" />
-                  <div>
-                    <div className="font-bold">{d.type}</div>
-                  </div>
-                </div>
-                <button
-                  className="ml-2 rounded-full px-3 py-1 bg-red-500 text-white text-sm hover:bg-red-600"
-                  onClick={() => onRemove(i)}
-                >
-                  X
-                </button>
-              </div>
-              <div className="text-gray-500 mt-2 text-right text-sm">
-                {d.time}
-              </div>
+  return (
+    <div className="mt-4 space-y-2">
+      {diapers.map((item) => (
+        <div
+          key={item.id}
+          className="p-3 transition-all hover:shadow-md border border-gray-200 rounded-xl bg-white"
+        >
+          <Flex justifyContent="justify-between" alignItems="items-center">
+            <div>
+              <p className="font-semibold text-gray-800">{item.tipo}</p>
+              <p className="text-sm text-gray-600">
+                {item.hora} — {new Date(item.date).toLocaleDateString("pt-BR")}
+              </p>
             </div>
-          ))}
+            <button
+              onClick={() => onRemove(item.id)}
+              className="p-1.5 rounded-md transition-colors hover:bg-red-100"
+            >
+              <X className="text-red-500 w-4 h-4" />
+            </button>
+          </Flex>
         </div>
-      ) : (
-        <div className="text-gray-500 mt-4">
-          Nenhuma fralda registrada hoje.
-        </div>
-      )}
-    </Card>
+      ))}
+    </div>
   );
 }

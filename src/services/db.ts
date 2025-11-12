@@ -1,57 +1,104 @@
-import { db } from "../firebase";
-import { doc, setDoc, getDoc, onSnapshot, updateDoc } from "firebase/firestore";
+const API_URL = "http://localhost:3001";
 
 export interface Med {
   nome: string;
   dose: number;
   horario: string;
+  date: string;
 }
 
 export interface Registro {
+  id?: string;
   hora: string;
   quantidade: number;
+  date?: string;
+  tipo?: string;
 }
 
 export interface Dia {
   meds: Med[];
   data: Registro[];
+  fraldas: Registro[];
 }
 
-export async function salvarMetaDiaria(valor: number) {
-  const ref = doc(db, "config", "metaDiaria");
-  await setDoc(ref, { valor });
+// Meta diária
+export async function getMetaDiaria(): Promise<number> {
+  const res = await fetch(`${API_URL}/meta`);
+  const data = await res.json();
+  return data.valor;
 }
 
-export function ouvirMetaDiaria(callback: (valor: number) => void) {
-  const ref = doc(db, "config", "metaDiaria");
-  return onSnapshot(ref, (snap) => {
-    if (snap.exists()) {
-      callback(snap.data().valor);
-    }
+export async function setMetaDiaria(valor: number): Promise<void> {
+  await fetch(`${API_URL}/meta`, {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ valor }),
   });
 }
 
-function getDiaRef(date: string) {
-  return doc(db, "dias", date);
+export function salvarMetaDiaria(valor: number) {
+  return setMetaDiaria(valor);
 }
 
-export async function salvarDia(date: string, dia: Dia) {
-  const ref = getDiaRef(date);
-  await setDoc(ref, dia);
+// Leite
+export async function getMilks() {
+  const res = await fetch(`${API_URL}/milks`);
+  return res.json();
 }
 
-export async function atualizarDia(date: string, parcial: Partial<Dia>) {
-  const ref = getDiaRef(date);
-  await updateDoc(ref, parcial);
+export async function getMilksByDate(date: string) {
+  const res = await fetch(`${API_URL}/milks?date=${date}`);
+  return res.json();
 }
 
-export function ouvirDia(date: string, callback: (dia: Dia) => void) {
-  const ref = getDiaRef(date);
-  return onSnapshot(ref, (snap) => {
-    if (snap.exists()) {
-      callback(snap.data() as Dia);
-    } else {
-      callback({ meds: [], data: [] });
-    }
+export async function addMilk(registro: Registro) {
+  await fetch(`${API_URL}/milks`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(registro),
   });
 }
+
+// Remédios
+export async function getMedicines() {
+  const res = await fetch(`${API_URL}/medicines`);
+  return res.json();
+}
+
+export async function getMedicinesByDate(date: string) {
+  const res = await fetch(`${API_URL}/medicines?date=${date}`);
+  return res.json();
+}
+
+export async function addMedicine(med: Med) {
+  await fetch(`${API_URL}/medicines`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(med),
+  });
+}
+
+// Fraldas
+export async function getFraldas() {
+  const res = await fetch(`${API_URL}/diapers`);
+  return res.json();
+}
+
+export async function getFraldasByDate(date: string) {
+  const res = await fetch(`${API_URL}/diapers?date=${date}`);
+  return res.json();
+}
+
+export async function addFralda(fralda: Registro) {
+  await fetch(`${API_URL}/diapers`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(fralda),
+  });
+}
+
+export {
+  getFraldas as getDiapers,
+  getFraldasByDate as getDiapersByDate,
+  addFralda as addDiaper,
+};

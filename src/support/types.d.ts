@@ -72,3 +72,8 @@ export type Med = {
   time?: string;
   date: DateString;
 };
+
+export type Registro = {
+  hora: string;
+  quantidade: number;
+};

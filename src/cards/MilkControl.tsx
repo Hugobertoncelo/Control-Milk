@@ -1,4 +1,4 @@
-import React, { useState, ChangeEvent } from "react";
+import React, { useState, useEffect, ChangeEvent } from "react";
 import {
   TextInput,
   Flex,
@@ -7,9 +7,12 @@ import {
   ProgressBar,
   Text,
 } from "@tremor/react";
-import { getDay, insert } from "../support/data";
-import type { Day, Insertion } from "../support/types";
-import { salvarMetaDiaria } from "../services/db";
+import {
+  getMilks,
+  addMilk,
+  getMetaDiaria,
+  salvarMetaDiaria,
+} from "../services/db";
 
 interface MilkControlProps {
   dailyGoal: number;
@@ -24,27 +27,36 @@ export default function MilkControl({
 }: MilkControlProps) {
   const [wait, setWait] = useState(false);
   const [customMl, setCustomMl] = useState("");
-  const [, setRefresh] = useState(0);
+  const [totalMl, setTotalMl] = useState(0);
 
-  const today: Day = getDay();
-  const totalMl = (today.data ?? []).reduce(
-    (acc: number, d: Insertion) => acc + (d?.v ?? 0),
-    0
-  );
+  useEffect(() => {
+    async function fetchData() {
+      const milks = await getMilks();
+      const total = milks.reduce(
+        (acc: number, d: any) => acc + (d?.quantidade ?? 0),
+        0
+      );
+      setTotalMl(total);
+    }
+    fetchData();
+  }, [wait, onUpdate]);
 
   const progress = Math.min((totalMl / dailyGoal) * 100, 100);
 
-  function handleAddMl(value: number) {
+  async function handleAddMl(value: number) {
     if (value <= 0) return;
     setWait(true);
-    try {
-      insert(value);
-      onUpdate?.();
-      setCustomMl("");
-      setRefresh((r) => r + 1);
-    } finally {
-      setTimeout(() => setWait(false), 300);
-    }
+    await addMilk({
+      hora: new Date().toLocaleTimeString("pt-BR", {
+        hour: "2-digit",
+        minute: "2-digit",
+      }),
+      quantidade: value,
+      date: new Date().toISOString().slice(0, 10),
+    });
+    setCustomMl("");
+    setWait(false);
+    onUpdate?.();
   }
 
   return (
@@ -54,10 +66,10 @@ export default function MilkControl({
         <TextInput
           placeholder="Meta diária (ml)"
           value={dailyGoal.toString()}
-          onChange={(e: ChangeEvent<HTMLInputElement>) => {
+          onChange={async (e: ChangeEvent<HTMLInputElement>) => {
             const value = Number(e.currentTarget.value.replace(/\D/g, ""));
             setDailyGoal?.(value);
-            salvarMetaDiaria(value);
+            await salvarMetaDiaria(value);
           }}
           maxWidth="max-w-xs"
         />

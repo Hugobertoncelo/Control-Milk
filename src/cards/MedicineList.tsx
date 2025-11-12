@@ -5,7 +5,7 @@ import { FaPills, FaCapsules, FaAppleAlt, FaHeartbeat } from "react-icons/fa";
 
 interface MedicineListProps {
   meds: Med[];
-  onRemove: (index: number) => void;
+  onRemove?: (index: number) => void;
 }
 
 export default function MedicineList({ meds, onRemove }: MedicineListProps) {
@@ -42,8 +42,8 @@ export default function MedicineList({ meds, onRemove }: MedicineListProps) {
 
       {meds.length > 0 ? (
         <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 gap-4">
-          {meds.map((m, i) => {
-            const style = getStyle(m.name);
+          {meds.map((m: any, i) => {
+            const style = getStyle(m.nome || m.name || "");
 
             return (
               <div
@@ -54,21 +54,22 @@ export default function MedicineList({ meds, onRemove }: MedicineListProps) {
                   <div className="flex items-center space-x-2">
                     {style.icon}
                     <div>
-                      <div className="font-bold">{m.name}</div>
+                      <div className="font-bold">{m.nome || m.name}</div>
                       <div>{m.dose}</div>
                     </div>
                   </div>
-
-                  <button
-                    className="ml-2 rounded-full px-3 py-1 bg-red-500 text-white text-sm hover:bg-red-600"
-                    onClick={() => onRemove(i)}
-                  >
-                    X
-                  </button>
+                  {onRemove && (
+                    <button
+                      className="ml-2 rounded-full px-3 py-1 bg-red-500 text-white text-sm hover:bg-red-600"
+                      onClick={() => onRemove(i)}
+                    >
+                      X
+                    </button>
+                  )}
                 </div>
 
                 <div className="text-gray-500 mt-2 text-right text-sm">
-                  {new Date(m.date).toLocaleDateString("pt-BR")} {m.time}
+                  {m.horario || m.time}
                 </div>
               </div>
             );

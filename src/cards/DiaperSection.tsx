@@ -1,9 +1,7 @@
-import React, { useState, FormEvent, ChangeEvent } from "react";
+import React, { useState, useEffect, ChangeEvent, FormEvent } from "react";
 import { Title, Flex, Button } from "@tremor/react";
+import { getFraldas, addFralda } from "../services/db";
 import DiaperList from "./DiaperList";
-import { getDataSet } from "../support/data";
-import { formatDateString } from "../support/helpers";
-import type { Day, DateString } from "../support/types";
 
 interface DiaperSectionProps {
   onUpdate?: () => void;
@@ -11,63 +9,50 @@ interface DiaperSectionProps {
 
 export default function DiaperSection({ onUpdate }: DiaperSectionProps) {
   const [diaperType, setDiaperType] = useState("");
-  const [, setRefresh] = useState(0);
+  const [diapers, setDiapers] = useState<any[]>([]);
+  const [refresh, setRefresh] = useState(0);
 
-  function addDiaper(e: FormEvent) {
-    e.preventDefault();
-    const dataset = getDataSet();
-    const date: DateString = formatDateString(new Date()) as DateString;
-
-    let day = dataset.find((d: Day) => d.date === date);
-    if (!day) {
-      day = { date, data: [], meds: [], diapers: [] };
-      dataset.push(day);
+  useEffect(() => {
+    async function fetchData() {
+      const data = await getFraldas();
+      setDiapers(data);
     }
-    if (!Array.isArray(day.diapers)) day.diapers = [];
+    fetchData();
+  }, [refresh]);
 
-    day.diapers.push({
-      type: diaperType,
-      time: new Date().toLocaleString("pt-BR", {
-        day: "2-digit",
-        month: "2-digit",
-        year: "numeric",
-        hour: "2-digit",
-        minute: "2-digit",
-      }),
-      date,
+  async function addDiaperForm(e: FormEvent) {
+    e.preventDefault();
+
+    const hora = new Date().toLocaleTimeString("pt-BR", {
+      hour: "2-digit",
+      minute: "2-digit",
     });
+    const date = new Date().toISOString().slice(0, 10);
+    const id = Math.random().toString(16).slice(2, 8);
 
-    localStorage.setItem("dataset", JSON.stringify(dataset));
+    await addFralda({
+      id, // ✅ id para conseguir deletar
+      hora,
+      quantidade: 1,
+      date,
+      tipo: diaperType, // ✅ nome correto do campo
+    } as any);
+
     setDiaperType("");
-    onUpdate?.();
     setRefresh((r) => r + 1);
+    onUpdate?.();
   }
 
-  function removeDiaper(index: number) {
-    const dataset = getDataSet();
-    const date: DateString = formatDateString(new Date()) as DateString;
-    const day = dataset.find((d: Day) => d.date === date);
-    if (!day || !Array.isArray(day.diapers)) return;
-
-    day.diapers.splice(index, 1);
-    localStorage.setItem("dataset", JSON.stringify(dataset));
-    onUpdate?.();
+  async function removeDiaper(id: string) {
+    await fetch(`http://localhost:3001/fraldas/${id}`, { method: "DELETE" });
     setRefresh((r) => r + 1);
+    onUpdate?.();
   }
-
-  const today: Day =
-    getDataSet().find((d: Day) => d.date === formatDateString(new Date())) ??
-    ({
-      date: formatDateString(new Date()) as DateString,
-      data: [],
-      meds: [],
-      diapers: [],
-    } as Day);
 
   return (
     <>
       <Title marginTop="mt-6">👶 Adicionar Fralda</Title>
-      <form onSubmit={addDiaper} className="my-4 flex flex-col gap-2">
+      <form onSubmit={addDiaperForm} className="my-4 flex flex-col gap-2">
         <select
           name="diaperType"
           value={diaperType}
@@ -82,13 +67,12 @@ export default function DiaperSection({ onUpdate }: DiaperSectionProps) {
           <option value="Cocô">Cocô</option>
           <option value="Mista">Mista</option>
         </select>
-
         <Flex justifyContent="justify-center" marginTop="mt-2">
           <Button text="Adicionar" type="submit" disabled={!diaperType} />
         </Flex>
       </form>
 
-      <DiaperList diapers={today.diapers ?? []} onRemove={removeDiaper} />
+      <DiaperList diapers={diapers} onRemove={removeDiaper} />
     </>
   );
 }

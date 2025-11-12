@@ -1,6 +1,6 @@
 import React from "react";
 import { Card, Title } from "@tremor/react";
-import type { Med, Registro } from "../services/db";
+import type { Med, Registro } from "../support/types";
 
 import MilkControl from "./MilkControl";
 import MedicineSection from "./MedicineSection";

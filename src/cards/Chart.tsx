@@ -1,89 +1,86 @@
-import type { CardProps, DataSet } from "../support/types";
+import React, { useState, useEffect } from "react";
+import { Card, Title, Button, Divider } from "@tremor/react";
+import { AreaChart } from "@tremor/react";
+import { getMilks } from "../services/db";
 
-import { useState, useEffect } from "react";
-
-import {
-  AreaChart,
-  Button,
-  Divider,
-  Dropdown,
-  DropdownItem,
-  Flex,
-} from "@tremor/react";
-
-import { dayWeek, sum } from "../support/helpers";
-
-import {
-  getDataSet,
-  getFillDataSet,
-  getSettings,
-  resetDataSet,
-  saveSettings,
-} from "../support/data";
-
-import { GrLineChart } from "react-icons/gr";
-
-interface ChartProps extends CardProps {
+interface ChartProps {
+  update?: number;
   goal: number;
 }
 
-export default function Chart({
-  goal,
-  update = 0,
-  onUpdate = () => {},
-  onAction = () => {},
-}: ChartProps) {
-  const { chart } = getSettings();
-
-  const [days, setDays] = useState<number>(chart);
-  const [data, setData] = useState<DataSet>([]);
+export default function Chart({ update = 0, goal }: ChartProps) {
+  const [milks, setMilks] = useState<any[]>([]);
+  const [total, setTotal] = useState(0);
 
   useEffect(() => {
-    setData(days > 0 ? getFillDataSet(days) : getDataSet());
-    saveSettings({ chart: days });
-  }, [days, update]);
+    async function fetchData() {
+      const data = await getMilks();
+      setMilks(data);
+      setTotal(
+        data.reduce((acc: number, d: any) => acc + (d?.quantidade ?? 0), 0)
+      );
+    }
+    fetchData();
+  }, [update]);
 
-  function reset() {
-    onAction("confirm", {
-      content: "Tem certeza que deseja apagar todas as informações?",
-      onConfirm: () => {
-        resetDataSet();
-        onUpdate();
-      },
-    });
-  }
+  // Gera dados acumulados para o gráfico
+  let acumulado = 0;
+  const chartData = milks.map((milk, i) => {
+    acumulado += milk.quantidade ?? 0;
+    return {
+      name: milk.hora || `Reg ${i + 1}`,
+      Ingerido: acumulado,
+      Objetivo: goal,
+    };
+  });
 
   return (
-    <>
-      <Dropdown defaultValue={days} handleSelect={setDays} icon={GrLineChart}>
-        <DropdownItem text="Últimos três dias" value={3} />
-        <DropdownItem text="Últimos sete dias" value={7} />
-        <DropdownItem text="Últimos quinze dias" value={15} />
-        <DropdownItem text="Últimos trinta dias" value={30} />
-        <DropdownItem text="Dias com informação" value={-1} />
-      </Dropdown>
-
-      <AreaChart
-        marginTop="mt-4"
-        categories={["Objetivo", "Ingerido"]}
-        colors={["sky", "orange"]}
-        dataKey="dayweek"
-        data={data.map((day) => ({
-          dayweek:
-            data.length < 10
-              ? dayWeek(day.date).substring(0, 3)
-              : day.date.replace(/^.*?(\d{1,2}$)/, "$1"),
-          Objetivo: goal,
-          Ingerido: sum(day),
-        }))}
-        valueFormatter={(v) => `${v.toLocaleString()} ml`}
-      />
-
-      <Divider />
-
-      <Flex justifyContent="justify-center" marginTop="mt-4">
-        <Button text="Resetar Informações" onClick={reset} />
-      </Flex>
-    </>
+    <Card marginTop="mt-8" shadow>
+      <Title>📈 Gráfico de Leite</Title>
+      <div className="mt-4">
+        <div>Meta diária: {goal} ml</div>
+        <div>Total ingerido: {total} ml</div>
+        <AreaChart
+          data={chartData}
+          categories={["Objetivo", "Ingerido"]}
+          dataKey="name"
+          colors={["sky", "orange"]}
+          valueFormatter={(v) => `${v} ml`}
+          yAxisWidth="w-16"
+        />
+        <Divider />
+        <div className="flex justify-center mt-4">
+          <Button
+            text="Resetar Informações"
+            color="blue"
+            onClick={async () => {
+              const milks = await getMilks();
+              for (const milk of milks) {
+                await fetch(`http://localhost:3001/milks/${milk.id}`, {
+                  method: "DELETE",
+                });
+              }
+              const diapers = await fetch("http://localhost:3001/diapers").then(
+                (r) => r.json()
+              );
+              for (const diaper of diapers) {
+                await fetch(`http://localhost:3001/diapers/${diaper.id}`, {
+                  method: "DELETE",
+                });
+              }
+              const medicines = await fetch(
+                "http://localhost:3001/medicines"
+              ).then((r) => r.json());
+              for (const med of medicines) {
+                await fetch(`http://localhost:3001/medicines/${med.id}`, {
+                  method: "DELETE",
+                });
+              }
+              window.location.reload();
+            }}
+          />
+        </div>
+      </div>
+    </Card>
   );
 }

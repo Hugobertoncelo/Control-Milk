@@ -13,7 +13,7 @@
     "@types/react": "^18.0.0",
     "@types/react-dom": "^18.0.0",
     "autoprefixer": "^10.4.13",
-    "firebase": "^12.2.1",
+    "lucide-react": "^0.553.0",
     "postcss": "^8.4.20",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
@@ -27,7 +27,8 @@
     "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
-    "eject": "react-scripts eject"
+    "eject": "react-scripts eject",
+    "json-server": "json-server --watch db.json --port 3001"
   },
   "eslintConfig": {
     "extends": [
@@ -49,6 +50,7 @@
   },
   "devDependencies": {
     "@types/babel__core": "^7.20.5",
-    "@types/babel__traverse": "^7.28.0"
+    "@types/babel__traverse": "^7.28.0",
+    "json-server": "^1.0.0-beta.3"
   }
 }
