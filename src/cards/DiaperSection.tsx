@@ -14,8 +14,12 @@ export default function DiaperSection({ onUpdate }: DiaperSectionProps) {
 
   useEffect(() => {
     async function fetchData() {
-      const data = await getFraldas();
-      setDiapers(data);
+      try {
+        const data = await getFraldas();
+        setDiapers(data);
+      } catch (err) {
+        console.error("Erro ao carregar fraldas:", err);
+      }
     }
     fetchData();
   }, [refresh]);
@@ -30,23 +34,30 @@ export default function DiaperSection({ onUpdate }: DiaperSectionProps) {
     const date = new Date().toISOString().slice(0, 10);
     const id = Math.random().toString(16).slice(2, 8);
 
-    await addFralda({
-      id, // ✅ id para conseguir deletar
-      hora,
-      quantidade: 1,
-      date,
-      tipo: diaperType, // ✅ nome correto do campo
-    } as any);
-
-    setDiaperType("");
-    setRefresh((r) => r + 1);
-    onUpdate?.();
+    try {
+      await addFralda({
+        id,
+        hora,
+        quantidade: 1,
+        date,
+        tipo: diaperType,
+      });
+      setDiaperType("");
+      setRefresh((r) => r + 1);
+      onUpdate?.();
+    } catch (err) {
+      console.error("Erro ao adicionar fralda:", err);
+    }
   }
 
   async function removeDiaper(id: string) {
-    await fetch(`http://localhost:3001/fraldas/${id}`, { method: "DELETE" });
-    setRefresh((r) => r + 1);
-    onUpdate?.();
+    try {
+      await fetch(`/api/diapers/${id}`, { method: "DELETE" });
+      setRefresh((r) => r + 1);
+      onUpdate?.();
+    } catch (err) {
+      console.error("Erro ao remover fralda:", err);
+    }
   }
 
   return (

@@ -8,6 +8,8 @@ interface ChartProps {
   goal: number;
 }
 
+const API_URL = "/api";
+
 export default function Chart({ update = 0, goal }: ChartProps) {
   const [milks, setMilks] = useState<any[]>([]);
   const [total, setTotal] = useState(0);
@@ -23,7 +25,6 @@ export default function Chart({ update = 0, goal }: ChartProps) {
     fetchData();
   }, [update]);
 
-  // Gera dados acumulados para o gráfico
   let acumulado = 0;
   const chartData = milks.map((milk, i) => {
     acumulado += milk.quantidade ?? 0;
@@ -54,28 +55,33 @@ export default function Chart({ update = 0, goal }: ChartProps) {
             text="Resetar Informações"
             color="blue"
             onClick={async () => {
-              const milks = await getMilks();
+              const milks = await fetch(`${API_URL}/milks`).then((r) =>
+                r.json()
+              );
               for (const milk of milks) {
-                await fetch(`http://localhost:3001/milks/${milk.id}`, {
+                await fetch(`${API_URL}/milks/${milk.id}`, {
                   method: "DELETE",
                 });
               }
-              const diapers = await fetch("http://localhost:3001/diapers").then(
-                (r) => r.json()
+
+              const diapers = await fetch(`${API_URL}/diapers`).then((r) =>
+                r.json()
               );
               for (const diaper of diapers) {
-                await fetch(`http://localhost:3001/diapers/${diaper.id}`, {
+                await fetch(`${API_URL}/diapers/${diaper.id}`, {
                   method: "DELETE",
                 });
               }
-              const medicines = await fetch(
-                "http://localhost:3001/medicines"
-              ).then((r) => r.json());
+
+              const medicines = await fetch(`${API_URL}/medicines`).then((r) =>
+                r.json()
+              );
               for (const med of medicines) {
-                await fetch(`http://localhost:3001/medicines/${med.id}`, {
+                await fetch(`${API_URL}/medicines/${med.id}`, {
                   method: "DELETE",
                 });
               }
+
               window.location.reload();
             }}
           />
