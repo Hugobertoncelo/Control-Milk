@@ -1,13 +1,12 @@
 import React, { useState, useEffect, ChangeEvent, FormEvent } from "react";
 import { Title, Flex, Button } from "@tremor/react";
-import { getFraldas, addFralda } from "../services/db";
 import DiaperList from "./DiaperList";
+
+const API_URL = "https://control-milk-api.onrender.com";
 
 interface DiaperSectionProps {
   onUpdate?: () => void;
 }
-
-const API_URL = process.env.REACT_APP_API_URL || "/api";
 
 export default function DiaperSection({ onUpdate }: DiaperSectionProps) {
   const [diaperType, setDiaperType] = useState("");
@@ -17,7 +16,7 @@ export default function DiaperSection({ onUpdate }: DiaperSectionProps) {
   useEffect(() => {
     async function fetchData() {
       try {
-        const data = await getFraldas();
+        const data = await fetch(`${API_URL}/diapers`).then((r) => r.json());
         setDiapers(data);
       } catch (err) {
         console.error("Erro ao carregar fraldas:", err);
@@ -37,12 +36,16 @@ export default function DiaperSection({ onUpdate }: DiaperSectionProps) {
     const id = Math.random().toString(16).slice(2, 8);
 
     try {
-      await addFralda({
-        id,
-        hora,
-        quantidade: 1,
-        date,
-        tipo: diaperType,
+      await fetch(`${API_URL}/diapers`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          id,
+          hora,
+          quantidade: 1,
+          date,
+          tipo: diaperType,
+        }),
       });
       setDiaperType("");
       setRefresh((r) => r + 1);
@@ -54,8 +57,7 @@ export default function DiaperSection({ onUpdate }: DiaperSectionProps) {
 
   async function removeDiaper(id: string) {
     try {
-      const res = await fetch(`${API_URL}/diapers/${id}`, { method: "DELETE" });
-      if (!res.ok) throw new Error("Falha ao deletar fralda");
+      await fetch(`${API_URL}/diapers/${id}`, { method: "DELETE" });
       setRefresh((r) => r + 1);
       onUpdate?.();
     } catch (err) {

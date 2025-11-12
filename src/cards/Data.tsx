@@ -1,11 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Card, Title, Dropdown, DropdownItem } from "@tremor/react";
-import {
-  getMilksByDate,
-  getMedicinesByDate,
-  getDiapersByDate,
-  getMilks,
-} from "../services/db";
+
+const API_URL = "https://control-milk-api.onrender.com";
 
 function formatDate(date: Date) {
   return date.toISOString().slice(0, 10);
@@ -24,7 +20,7 @@ export default function Data({ update }: DataProps) {
 
   async function fetchDates() {
     try {
-      const all: any[] = await getMilks();
+      const all: any[] = await fetch(`${API_URL}/milks`).then((r) => r.json());
       const uniqueDates = Array.from(new Set(all.map((m) => m.date))).filter(
         Boolean
       );
@@ -37,10 +33,11 @@ export default function Data({ update }: DataProps) {
   async function fetchData() {
     try {
       const [milkData, medData, diaperData] = await Promise.all([
-        getMilksByDate(date),
-        getMedicinesByDate(date),
-        getDiapersByDate(date),
+        fetch(`${API_URL}/milks?date=${date}`).then((r) => r.json()),
+        fetch(`${API_URL}/medicines?date=${date}`).then((r) => r.json()),
+        fetch(`${API_URL}/diapers?date=${date}`).then((r) => r.json()),
       ]);
+
       setMilks(milkData);
       setMeds(medData);
       setFraldas(diaperData);
@@ -69,7 +66,6 @@ export default function Data({ update }: DataProps) {
         ))}
       </Dropdown>
 
-      {/* Leite */}
       <div className="mt-4">
         <div className="text-blue-700 font-bold text-lg">🥛 Leite</div>
         <div className="font-semibold text-gray-800 mt-1">
@@ -84,7 +80,6 @@ export default function Data({ update }: DataProps) {
         </ul>
       </div>
 
-      {/* Remédios */}
       <div className="mt-4">
         <div className="text-green-700 font-bold text-lg">💊 Remédios</div>
         <div className="font-semibold text-gray-800 mt-1">
@@ -99,7 +94,6 @@ export default function Data({ update }: DataProps) {
         </ul>
       </div>
 
-      {/* Fraldas */}
       <div className="mt-4">
         <div className="text-yellow-700 font-bold text-lg">🍼 Fraldas</div>
         <div className="font-semibold text-gray-800 mt-1">
