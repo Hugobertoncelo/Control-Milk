@@ -1,4 +1,5 @@
-const API_URL = "/api";
+// db.ts
+const API_URL = "https://control-milk-api.onrender.com";
 
 export interface Med {
   nome: string;
