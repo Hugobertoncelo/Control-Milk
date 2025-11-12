@@ -1,21 +1,21 @@
 const express = require("express");
-const jsonServer = require("json-server");
 const path = require("path");
+const jsonServer = require("json-server");
 
 const app = express();
-const router = jsonServer.router(path.join(__dirname, "db.json"));
+const router = jsonServer.router("db.json");
 const middlewares = jsonServer.defaults();
 
-app.use(middlewares);
-app.use(jsonServer.bodyParser);
+// Rotas da API (Ex: /api/milks, /api/diapers)
+app.use("/api", middlewares, router);
 
-// Rota principal para teste
-app.get("/", (req, res) => {
-  res.send("✅ Control Milk API está rodando!");
+// Servir o React build
+app.use(express.static(path.join(__dirname, "build")));
+
+// Qualquer rota desconhecida → React index.html
+app.get("*", (req, res) => {
+  res.sendFile(path.join(__dirname, "build", "index.html"));
 });
 
-// Rotas da API
-app.use("/api", router);
-
-const PORT = process.env.PORT || 3001;
-app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => console.log(`Server running on port ${PORT}`));

@@ -1,30 +1,7 @@
 {
-  "milks": [
-    {
-      "id": "2e0b",
-      "hora": "18:01",
-      "quantidade": 200,
-      "date": "2025-11-12"
-    }
-  ],
-  "diapers": [
-    {
-      "id": "3e3f03",
-      "hora": "18:01",
-      "quantidade": 1,
-      "date": "2025-11-12",
-      "tipo": "Mijinha"
-    }
-  ],
-  "medicines": [
-    {
-      "id": "e76b",
-      "nome": "Ibuprofeno",
-      "dose": 3,
-      "horario": "18:01",
-      "date": "2025-11-12"
-    }
-  ],
+  "milks": [],
+  "diapers": [],
+  "medicines": [],
   "meta": {
     "valor": 800
   }
