@@ -61,12 +61,15 @@ export default function DiaperSection({ onUpdate }: DiaperSectionProps) {
           <Button text="Adicionar" type="submit" disabled={!diaperType} />
         </Flex>
       </form>
-      <DiaperList diapers={diapers.map((d, i) => ({
-        id: i.toString(),
-        hora: d.time,
-        tipo: d.type,
-        date: d.date,
-      }))} onRemove={(id) => handleRemove(Number(id))} />
+      <DiaperList
+        diapers={diapers.map((d, i) => ({
+          id: i.toString(),
+          hora: d.time,
+          tipo: d.type,
+          date: d.date,
+        }))}
+        onRemove={(id) => handleRemove(Number(id))}
+      />
     </>
   );
 }

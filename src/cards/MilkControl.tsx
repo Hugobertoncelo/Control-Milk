@@ -7,12 +7,7 @@ import {
   ProgressBar,
   Text,
 } from "@tremor/react";
-import {
-  getDay,
-  insert,
-  getSettings,
-  saveSettings,
-} from "../support/data";
+import { getDay, insert, getSettings, saveSettings } from "../support/data";
 
 interface MilkControlProps {
   dailyGoal: number;
