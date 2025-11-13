@@ -16,10 +16,18 @@ export default function Data({ update }: DataProps) {
 
   useEffect(() => {
     async function fetchDataSet() {
-      const dataSet = await getDataSet();
-      const uniqueDates = dataSet.map((d) => d.date).filter(Boolean);
-      setDates(uniqueDates.sort().reverse());
-      if (!date && uniqueDates.length > 0) setDate(uniqueDates[0]);
+      try {
+        const dataSet = await getDataSet();
+        if (!Array.isArray(dataSet)) {
+          setDates([]);
+          return;
+        }
+        const uniqueDates = dataSet.map((d) => d.date).filter(Boolean);
+        setDates(uniqueDates.sort().reverse());
+        if (!date && uniqueDates.length > 0) setDate(uniqueDates[0]);
+      } catch (e) {
+        setDates([]);
+      }
     }
     fetchDataSet();
   }, [update]);
@@ -40,11 +48,18 @@ export default function Data({ update }: DataProps) {
   return (
     <Card marginTop="mt-8" shadow>
       <Title>📅 Registros do Dia</Title>
-      <Dropdown value={date} onValueChange={setDate}>
-        {dates.map((d) => (
-          <DropdownItem key={d} value={d} text={d} />
-        ))}
-      </Dropdown>
+      {dates.length === 0 ? (
+        <div className="text-red-600 font-bold my-4">
+          Não foi possível carregar os dados. Verifique sua conexão ou tente
+          novamente mais tarde.
+        </div>
+      ) : (
+        <Dropdown value={date} onValueChange={setDate}>
+          {dates.map((d) => (
+            <DropdownItem key={d} value={d} text={d} />
+          ))}
+        </Dropdown>
+      )}
       {/* Leite */}
       <div className="mt-4">
         <div className="text-blue-700 font-bold text-lg">🥛 Leite</div>
