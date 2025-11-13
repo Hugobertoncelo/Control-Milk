@@ -15,18 +15,24 @@ export default function Data({ update }: DataProps) {
   const [fraldas, setFraldas] = useState<any[]>([]);
 
   useEffect(() => {
-    const dataSet = getDataSet();
-    const uniqueDates = dataSet.map((d) => d.date).filter(Boolean);
-    setDates(uniqueDates.sort().reverse());
-    if (!date && uniqueDates.length > 0) setDate(uniqueDates[0]);
+    async function fetchDataSet() {
+      const dataSet = await getDataSet();
+      const uniqueDates = dataSet.map((d) => d.date).filter(Boolean);
+      setDates(uniqueDates.sort().reverse());
+      if (!date && uniqueDates.length > 0) setDate(uniqueDates[0]);
+    }
+    fetchDataSet();
   }, [update]);
 
   useEffect(() => {
-    if (!date) return;
-    const day = getDay(date as any);
-    setMilks(day.data || []);
-    setMeds(day.meds || []);
-    setFraldas(day.diapers || []);
+    async function fetchDay() {
+      if (!date) return;
+      const day = await getDay(date as any);
+      setMilks(day.data || []);
+      setMeds(day.meds || []);
+      setFraldas(day.diapers || []);
+    }
+    fetchDay();
   }, [date, update]);
 
   const totalLeite = milks.reduce((acc: number, m: any) => acc + (m.v ?? 0), 0);

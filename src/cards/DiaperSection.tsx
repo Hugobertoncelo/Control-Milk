@@ -14,13 +14,16 @@ export default function DiaperSection({ onUpdate }: DiaperSectionProps) {
   const [refresh, setRefresh] = useState(0);
 
   useEffect(() => {
-    const today = getDay();
-    setDiapers(today.diapers || []);
+    async function fetchToday() {
+      const today = await getDay();
+      setDiapers(today.diapers || []);
+    }
+    fetchToday();
   }, [refresh]);
 
-  function addDiaperForm(e: FormEvent) {
+  async function addDiaperForm(e: FormEvent) {
     e.preventDefault();
-    addDiaper({
+    await addDiaper({
       type: diaperType,
       time: new Date().toLocaleTimeString("pt-BR", {
         hour: "2-digit",
@@ -33,8 +36,8 @@ export default function DiaperSection({ onUpdate }: DiaperSectionProps) {
     onUpdate?.();
   }
 
-  function handleRemove(index: number) {
-    removeDiaper(index);
+  async function handleRemove(index: number) {
+    await removeDiaper(index);
     setRefresh((r) => r + 1);
     onUpdate?.();
   }

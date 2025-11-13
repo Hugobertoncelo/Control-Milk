@@ -25,17 +25,30 @@ export default function MilkControl({
   const [totalMl, setTotalMl] = useState(0);
 
   useEffect(() => {
-    const today = getDay();
-    const total = today.data.reduce((acc, d) => acc + (d?.v ?? 0), 0);
-    setTotalMl(total);
+    async function fetchTotal() {
+      try {
+        const today = await getDay();
+        if (!today || !Array.isArray(today.data)) {
+          setTotalMl(0);
+        } else {
+          const total = today.data.reduce((acc, d) => acc + (d?.v ?? 0), 0);
+          setTotalMl(total);
+        }
+      } catch (e) {
+        setTotalMl(0);
+      }
+    }
+    fetchTotal();
   }, [wait, onUpdate]);
 
   const progress = Math.min((totalMl / dailyGoal) * 100, 100);
 
-  function handleAddMl(value: number) {
+  async function handleAddMl(value: number) {
     if (value <= 0) return;
     setWait(true);
-    insert(value);
+    try {
+      await insert(value);
+    } catch (e) {}
     setCustomMl("");
     setWait(false);
     onUpdate?.();
@@ -48,10 +61,10 @@ export default function MilkControl({
         <TextInput
           placeholder="Meta diária (ml)"
           value={dailyGoal.toString()}
-          onChange={(e: ChangeEvent<HTMLInputElement>) => {
+          onChange={async (e: ChangeEvent<HTMLInputElement>) => {
             const value = Number(e.currentTarget.value.replace(/\D/g, ""));
             setDailyGoal?.(value);
-            saveSettings({ goal: value });
+            await saveSettings({ goal: value });
           }}
           maxWidth="max-w-xs"
         />

@@ -39,12 +39,12 @@ export default function MedicineList({ meds, onRemove }: MedicineListProps) {
     };
   }
 
-  function handleRemove(index: number) {
+  async function handleRemove(index: number) {
     if (onRemove) {
       onRemove(index);
     } else {
-      const today = getDay();
-      removeMed(index, today.date);
+      const today = await getDay();
+      await removeMed(index, today.date);
       setForceUpdate((v) => v + 1);
     }
   }

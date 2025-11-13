@@ -12,9 +12,14 @@ export default function Chart({ update = 0, goal }: ChartProps) {
   const [total, setTotal] = useState(0);
 
   useEffect(() => {
-    const today = getDay();
-    setMilks([...today.data]);
-    setTotal(today.data.reduce((acc: number, d: any) => acc + (d?.v ?? 0), 0));
+    async function fetchToday() {
+      const today = await getDay();
+      setMilks([...today.data]);
+      setTotal(
+        today.data.reduce((acc: number, d: any) => acc + (d?.v ?? 0), 0)
+      );
+    }
+    fetchToday();
   }, [update, localStorage.getItem("dataset")]);
 
   let acumulado = 0;
@@ -27,8 +32,9 @@ export default function Chart({ update = 0, goal }: ChartProps) {
     };
   });
 
-  const handleReset = () => {
-    localStorage.clear();
+  const handleReset = async () => {
+    // Não é possível resetar localStorage, então pode-se criar um endpoint de reset na API se necessário
+    // Aqui apenas recarrega os dados
     window.location.reload();
   };
 

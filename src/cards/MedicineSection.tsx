@@ -15,14 +15,17 @@ export default function MedicineSection({ onUpdate }: MedicineSectionProps) {
   const [meds, setMeds] = useState<any[]>([]);
 
   useEffect(() => {
-    const today = getDay();
-    setMeds(today.meds || []);
+    async function fetchToday() {
+      const today = await getDay();
+      setMeds(today.meds || []);
+    }
+    fetchToday();
   }, [wait, onUpdate]);
 
-  function addMedLocal(e: FormEvent) {
+  async function addMedLocal(e: FormEvent) {
     e.preventDefault();
     setWait(true);
-    addMed({
+    await addMed({
       name: medName.trim(),
       dose: medDose,
       date: formatDateString(new Date()),
@@ -33,11 +36,12 @@ export default function MedicineSection({ onUpdate }: MedicineSectionProps) {
     onUpdate?.();
   }
 
-  function handleRemove(index: number) {
+  async function handleRemove(index: number) {
     setWait(true);
-    const today = getDay();
-    removeMed(index, today.date); // Remove apenas o remédio selecionado
-    setMeds(getDay(today.date).meds || []); // Atualiza o estado local
+    const today = await getDay();
+    await removeMed(index, today.date);
+    const updated = await getDay(today.date);
+    setMeds(updated.meds || []);
     setWait(false);
     onUpdate?.();
   }
