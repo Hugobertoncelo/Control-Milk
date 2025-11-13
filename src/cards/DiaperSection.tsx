@@ -3,7 +3,7 @@ import { Title, Flex, Button } from "@tremor/react";
 import DiaperList from "./DiaperList";
 
 const API_URL =
-  process.env.REACT_APP_API_URL || "https://control-milk-api.onrender.com/";
+  process.env.REACT_APP_API_URL || "https://control-milk-api.onrender.com";
 
 interface Diaper {
   id: string;

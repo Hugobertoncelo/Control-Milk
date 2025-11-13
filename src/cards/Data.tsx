@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Card, Title, Dropdown, DropdownItem } from "@tremor/react";
 
 const API_URL =
-  process.env.REACT_APP_API_URL || "https://control-milk-api.onrender.com/";
+  process.env.REACT_APP_API_URL || "https://control-milk-api.onrender.com";
 
 function formatDate(date: Date) {
   return date.toISOString().slice(0, 10);
