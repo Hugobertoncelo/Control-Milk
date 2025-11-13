@@ -13,6 +13,7 @@
     "@types/react": "^18.0.0",
     "@types/react-dom": "^18.0.0",
     "autoprefixer": "^10.4.13",
+    "json-server": "^1.0.0-beta.3",
     "lucide-react": "^0.553.0",
     "postcss": "^8.4.20",
     "react": "^18.2.0",
@@ -50,7 +51,6 @@
   },
   "devDependencies": {
     "@types/babel__core": "^7.20.5",
-    "@types/babel__traverse": "^7.28.0",
-    "json-server": "^1.0.0-beta.3"
+    "@types/babel__traverse": "^7.28.0"
   }
 }
