@@ -2,7 +2,7 @@
   "name": "control-milk",
   "version": "0.1.0",
   "private": true,
-  "homepage": "./",
+  "homepage": ".",
   "dependencies": {
     "@testing-library/jest-dom": "^5.14.1",
     "@testing-library/react": "^13.0.0",
@@ -24,11 +24,11 @@
     "web-vitals": "^2.1.0"
   },
   "scripts": {
-    "start": "node server.js",
+    "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
-    "json-server": "json-server --watch db.json --port 3001"
+    "serve:json": "json-server --watch db.json --port 3001"
   },
   "eslintConfig": {
     "extends": [
