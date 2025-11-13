@@ -13,16 +13,16 @@ export default function Chart({ update = 0, goal }: ChartProps) {
 
   useEffect(() => {
     const today = getDay();
-    setMilks(today.data || []);
+    setMilks([...today.data]);
     setTotal(today.data.reduce((acc: number, d: any) => acc + (d?.v ?? 0), 0));
-  }, [update]);
+  }, [update, localStorage.getItem("dataset")]);
 
   let acumulado = 0;
   const chartData = milks.map((milk, i) => {
     acumulado += milk.v ?? 0;
     return {
       name: milk.t || `Reg ${i + 1}`,
-      Ingerido: acumulado,
+      "Leite Acumulado": acumulado,
       Objetivo: goal,
     };
   });
@@ -34,13 +34,12 @@ export default function Chart({ update = 0, goal }: ChartProps) {
 
   return (
     <Card marginTop="mt-8" shadow>
-      <Title>📈 Gráfico de Leite</Title>
       <div className="mt-4">
         <div>Meta diária: {goal} ml</div>
         <div>Total ingerido: {total} ml</div>
         <AreaChart
           data={chartData}
-          categories={["Objetivo", "Ingerido"]}
+          categories={["Objetivo", "Leite Acumulado"]}
           dataKey="name"
           colors={["sky", "orange"]}
           valueFormatter={(v) => `${v} ml`}
