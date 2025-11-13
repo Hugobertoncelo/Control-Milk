@@ -67,7 +67,7 @@ export default function MedicineSection({ onUpdate }: MedicineSectionProps) {
           <option value="">Selecione o Remédio</option>
           <option value="Paracetamol">Paracetamol</option>
           <option value="Ibuprofeno">Ibuprofeno</option>
-          <option value="Simeticona">Simeticona</option>
+          <option value="Luftal">Luftal</option>
           <option value="Vitamina C">Vitamina C</option>
           <option value="Outros">Outros</option>
         </select>
