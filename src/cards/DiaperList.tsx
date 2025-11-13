@@ -17,7 +17,7 @@ function getStyle(tipo: string) {
   const lower = tipo.toLowerCase();
   if (lower.includes("cocô")) {
     return {
-      color: "bg-yellow-100",
+      color: "bg-blue-100",
       icon: <FaPoo className="text-yellow-700" />,
     };
   }
@@ -33,12 +33,12 @@ function getStyle(tipo: string) {
   }
   if (lower.includes("mista")) {
     return {
-      color: "bg-purple-100",
+      color: "bg-blue-100",
       icon: <FaExchangeAlt className="text-purple-600" />,
     };
   }
   return {
-    color: "bg-gray-100",
+    color: "bg-blue-100",
     icon: <FaBaby className="text-gray-600" />,
   };
 }
@@ -66,10 +66,7 @@ export default function DiaperList({ diapers, onRemove }: DiaperListProps) {
                 {style.icon}
                 <div>
                   <div className="font-bold">{item.tipo}</div>
-                  <div className="text-sm text-gray-600">
-                    {item.hora} —{" "}
-                    {new Date(item.date).toLocaleDateString("pt-BR")}
-                  </div>
+                  <div className="text-sm text-gray-600">{item.hora}</div>
                 </div>
               </div>
               <button

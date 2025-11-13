@@ -1,7 +1,8 @@
-import React from "react";
+import React, { useState } from "react";
 import { Card, Title } from "@tremor/react";
 import type { Med } from "../support/types";
 import { FaPills, FaCapsules, FaAppleAlt, FaHeartbeat } from "react-icons/fa";
+import { getDay, removeMed } from "../support/data";
 
 interface MedicineListProps {
   meds: Med[];
@@ -9,6 +10,8 @@ interface MedicineListProps {
 }
 
 export default function MedicineList({ meds, onRemove }: MedicineListProps) {
+  const [_, setForceUpdate] = useState(0);
+
   function getStyle(name: string) {
     const lower = name.toLowerCase();
     if (lower.includes("vitamina") || lower.includes("vitamin")) {
@@ -36,6 +39,16 @@ export default function MedicineList({ meds, onRemove }: MedicineListProps) {
     };
   }
 
+  function handleRemove(index: number) {
+    if (onRemove) {
+      onRemove(index);
+    } else {
+      const today = getDay();
+      removeMed(index, today.date);
+      setForceUpdate((v) => v + 1);
+    }
+  }
+
   return (
     <Card marginTop="mt-8" shadow>
       <Title>💊 Remédios Ingeridos</Title>
@@ -44,7 +57,7 @@ export default function MedicineList({ meds, onRemove }: MedicineListProps) {
         <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 gap-4">
           {meds.map((m: any, i) => {
             const style = getStyle(m.nome || m.name || "");
-
+            const hora = m.horario || m.time || m.hora;
             return (
               <div
                 key={i}
@@ -55,21 +68,24 @@ export default function MedicineList({ meds, onRemove }: MedicineListProps) {
                     {style.icon}
                     <div>
                       <div className="font-bold">{m.nome || m.name}</div>
-                      <div>{m.dose}</div>
+                      <div className="text-sm text-gray-600">
+                        {hora
+                          ? `Hora: ${hora} — ${m.dose} gotas`
+                          : `${m.dose} gotas`}
+                      </div>
                     </div>
                   </div>
-                  {onRemove && (
-                    <button
-                      className="ml-2 rounded-full px-3 py-1 bg-red-500 text-white text-sm hover:bg-red-600"
-                      onClick={() => onRemove(i)}
-                    >
-                      X
-                    </button>
-                  )}
+                  <button
+                    className="ml-2 rounded-full px-3 py-1 bg-red-500 text-white text-sm hover:bg-red-600"
+                    onClick={() => handleRemove(i)}
+                    title="Remover remédio"
+                  >
+                    X
+                  </button>
                 </div>
 
                 <div className="text-gray-500 mt-2 text-right text-sm">
-                  {m.horario || m.time}
+                  {hora}
                 </div>
               </div>
             );

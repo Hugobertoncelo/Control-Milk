@@ -23,7 +23,6 @@ export default function Data({ update }: DataProps) {
 
   useEffect(() => {
     if (!date) return;
-    // Forçar o tipo para DateString, pois as datas vêm do próprio sistema
     const day = getDay(date as any);
     setMilks(day.data || []);
     setMeds(day.meds || []);
@@ -63,11 +62,15 @@ export default function Data({ update }: DataProps) {
         <ul className="mt-1 list-disc ml-5 text-gray-700">
           {meds.map((med: any, i: number) => (
             <li key={i}>
-              {med.time || med.horario} — {med.name || med.nome} ({med.dose})
+              {med.horario || med.time || med.hora
+                ? `${med.horario || med.time || med.hora} — `
+                : ""}
+              {med.nome || med.name} — {med.dose} gotas
             </li>
           ))}
         </ul>
       </div>
+
       {/* Fraldas */}
       <div className="mt-4">
         <div className="text-yellow-700 font-bold text-lg">🍼 Fraldas</div>

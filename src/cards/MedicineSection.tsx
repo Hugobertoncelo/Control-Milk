@@ -1,6 +1,6 @@
 import React, { useState, useEffect, ChangeEvent, FormEvent } from "react";
 import { Title, Flex, Button } from "@tremor/react";
-import { addMed, getDay } from "../support/data";
+import { addMed, getDay, removeMed } from "../support/data";
 import { formatDateString } from "../support/helpers";
 import MedicineList from "./MedicineList";
 
@@ -29,6 +29,15 @@ export default function MedicineSection({ onUpdate }: MedicineSectionProps) {
     });
     setMedName("");
     setMedDose("");
+    setWait(false);
+    onUpdate?.();
+  }
+
+  function handleRemove(index: number) {
+    setWait(true);
+    const today = getDay();
+    removeMed(index, today.date); // Remove apenas o remédio selecionado
+    setMeds(getDay(today.date).meds || []); // Atualiza o estado local
     setWait(false);
     onUpdate?.();
   }
@@ -79,7 +88,7 @@ export default function MedicineSection({ onUpdate }: MedicineSectionProps) {
           />
         </Flex>
       </form>
-      <MedicineList meds={meds} onRemove={() => {}} />
+      <MedicineList meds={meds} onRemove={handleRemove} />
     </>
   );
 }

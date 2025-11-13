@@ -3,7 +3,6 @@ import { Main, Data, Chart } from "./cards";
 import { Card, ColGrid, Title, Text } from "@tremor/react";
 import Modals from "./modals";
 import Footer from "./Footer";
-import { getMetaDiaria } from "./services/db";
 
 export default function App() {
   const classSection = "bg-blue-100 m-0 px-6 sm:px-12 md:px-18 lg:px-24";
@@ -11,11 +10,15 @@ export default function App() {
   const [dailyGoalValue, setDailyGoalValue] = useState<number>(600);
 
   useEffect(() => {
-    async function fetchMeta() {
-      const meta = await getMetaDiaria();
-      setDailyGoalValue(meta);
+    const settings = localStorage.getItem("settings");
+    let meta = 600;
+    if (settings) {
+      try {
+        const parsed = JSON.parse(settings);
+        if (parsed.goal) meta = parsed.goal;
+      } catch {}
     }
-    fetchMeta();
+    setDailyGoalValue(meta);
   }, []);
 
   return (
