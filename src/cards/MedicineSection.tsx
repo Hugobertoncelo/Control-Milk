@@ -1,6 +1,7 @@
 import React, { useState, useEffect, ChangeEvent, FormEvent } from "react";
 import { Title, Flex, Button } from "@tremor/react";
-import { getMedicines, addMedicine } from "../services/db";
+import { addMed, getDay } from "../support/data";
+import { formatDateString } from "../support/helpers";
 import MedicineList from "./MedicineList";
 
 interface MedicineSectionProps {
@@ -14,29 +15,18 @@ export default function MedicineSection({ onUpdate }: MedicineSectionProps) {
   const [meds, setMeds] = useState<any[]>([]);
 
   useEffect(() => {
-    async function fetchData() {
-      const data = await getMedicines();
-      setMeds(data);
-    }
-    fetchData();
+    const today = getDay();
+    setMeds(today.meds || []);
   }, [wait, onUpdate]);
 
-  async function addMed(e: FormEvent) {
+  function addMedLocal(e: FormEvent) {
     e.preventDefault();
     setWait(true);
-
-    const now = new Date();
-    const medData = {
-      nome: medName.trim(),
-      dose: Number(medDose),
-      horario: now.toLocaleTimeString("pt-BR", {
-        hour: "2-digit",
-        minute: "2-digit",
-      }),
-      date: now.toISOString().slice(0, 10),
-    };
-
-    await addMedicine(medData);
+    addMed({
+      name: medName.trim(),
+      dose: medDose,
+      date: formatDateString(new Date()),
+    });
     setMedName("");
     setMedDose("");
     setWait(false);
@@ -46,8 +36,7 @@ export default function MedicineSection({ onUpdate }: MedicineSectionProps) {
   return (
     <>
       <Title marginTop="mt-6">💊 Adicionar Remédio</Title>
-
-      <form onSubmit={addMed} className="my-4 flex flex-col gap-2">
+      <form onSubmit={addMedLocal} className="my-4 flex flex-col gap-2">
         <select
           name="medName"
           value={medName}
@@ -65,7 +54,6 @@ export default function MedicineSection({ onUpdate }: MedicineSectionProps) {
           <option value="Vitamina C">Vitamina C</option>
           <option value="Outros">Outros</option>
         </select>
-
         <select
           name="medDose"
           value={medDose}
@@ -83,7 +71,6 @@ export default function MedicineSection({ onUpdate }: MedicineSectionProps) {
             </option>
           ))}
         </select>
-
         <Flex justifyContent="justify-center" marginTop="mt-2">
           <Button
             text="Adicionar"
@@ -92,7 +79,6 @@ export default function MedicineSection({ onUpdate }: MedicineSectionProps) {
           />
         </Flex>
       </form>
-
       <MedicineList meds={meds} onRemove={() => {}} />
     </>
   );
