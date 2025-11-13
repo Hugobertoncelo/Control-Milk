@@ -3,6 +3,7 @@ import { Main, Data, Chart } from "./cards";
 import { Card, ColGrid, Title, Text } from "@tremor/react";
 import Modals from "./modals";
 import Footer from "./Footer";
+import { getSettings, saveSettings } from "./support/data";
 
 export default function App() {
   const classSection = "bg-blue-100 m-0 px-6 sm:px-12 md:px-18 lg:px-24";
@@ -10,16 +11,28 @@ export default function App() {
   const [dailyGoalValue, setDailyGoalValue] = useState<number>(600);
 
   useEffect(() => {
-    const settings = localStorage.getItem("settings");
-    let meta = 600;
-    if (settings) {
+    async function fetchGoal() {
       try {
-        const parsed = JSON.parse(settings);
-        if (parsed.goal) meta = parsed.goal;
-      } catch {}
+        const settings = await getSettings();
+        setDailyGoalValue(settings.goal || 600);
+      } catch {
+        setDailyGoalValue(600);
+      }
     }
-    setDailyGoalValue(meta);
-  }, []);
+    fetchGoal();
+  }, [update]);
+
+  async function handleSetDailyGoal(
+    value: number | ((prev: number) => number)
+  ) {
+    let newValue = value;
+    if (typeof value === "function") {
+      newValue = value(dailyGoalValue);
+    }
+    const goalNumber = typeof newValue === "number" ? newValue : dailyGoalValue;
+    await saveSettings({ goal: goalNumber });
+    setUpdate((u) => u + 1); // força recarregar a meta do backend
+  }
 
   return (
     <>
@@ -43,7 +56,7 @@ export default function App() {
             <Main
               update={update}
               dailyGoal={dailyGoalValue}
-              setDailyGoal={setDailyGoalValue}
+              setDailyGoal={handleSetDailyGoal}
               onUpdate={() => setUpdate((update) => update + 1)}
             />
           </Card>
