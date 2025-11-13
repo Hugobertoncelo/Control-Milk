@@ -93,7 +93,7 @@ export default function Data({ update }: DataProps) {
     <Card marginTop="mt-8" shadow>
       <Title>📅 Registros do Dia</Title>
 
-      <Dropdown value={date} handleSelect={setDate}>
+      <Dropdown value={date} onValueChange={setDate}>
         {dates.map((d) => (
           <DropdownItem key={d} value={d} text={d} />
         ))}

@@ -21,7 +21,11 @@ function getStyle(tipo: string) {
       icon: <FaPoo className="text-yellow-700" />,
     };
   }
-  if (lower.includes("mijinha") || lower.includes("xixi") || lower.includes("urina")) {
+  if (
+    lower.includes("mijinha") ||
+    lower.includes("xixi") ||
+    lower.includes("urina")
+  ) {
     return {
       color: "bg-blue-100",
       icon: <FaTint className="text-blue-600" />,
@@ -63,7 +67,8 @@ export default function DiaperList({ diapers, onRemove }: DiaperListProps) {
                 <div>
                   <div className="font-bold">{item.tipo}</div>
                   <div className="text-sm text-gray-600">
-                    {item.hora} — {new Date(item.date).toLocaleDateString("pt-BR")}
+                    {item.hora} —{" "}
+                    {new Date(item.date).toLocaleDateString("pt-BR")}
                   </div>
                 </div>
               </div>
