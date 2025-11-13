@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Card, Title, Button, Divider, AreaChart } from "@tremor/react";
-import { getDay, getSettings } from "../support/data";
+import { getDay, getSettings, saveDay } from "../support/data";
 
 interface ChartProps {
   update?: number;
@@ -33,9 +33,13 @@ export default function Chart({ update = 0, goal }: ChartProps) {
   });
 
   const handleReset = async () => {
-    // Não é possível resetar localStorage, então pode-se criar um endpoint de reset na API se necessário
-    // Aqui apenas recarrega os dados
-    window.location.reload();
+    const today = await getDay();
+    today.data = [];
+    today.meds = [];
+    today.diapers = [];
+    await saveDay(today);
+    setMilks([]);
+    setTotal(0);
   };
 
   return (

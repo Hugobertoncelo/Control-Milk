@@ -29,6 +29,10 @@ export default function MedicineSection({ onUpdate }: MedicineSectionProps) {
       name: medName.trim(),
       dose: medDose,
       date: formatDateString(new Date()),
+      time: new Date().toLocaleTimeString("pt-BR", {
+        hour: "2-digit",
+        minute: "2-digit",
+      }),
     });
     setMedName("");
     setMedDose("");
