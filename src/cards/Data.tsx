@@ -106,7 +106,7 @@ export default function Data({ update }: DataProps) {
       {/* Fraldas */}
       <div className="mt-6 p-4 rounded-lg bg-yellow-50 border border-yellow-200 shadow-sm">
         <div className="text-yellow-700 font-bold text-lg flex items-center gap-2">
-          🍼 Fraldas
+          🧷 Fraldas
         </div>
         <div className="font-semibold text-gray-800 mt-1">
           Total: {fraldas.length}

@@ -31,7 +31,7 @@ export default function App() {
     }
     const goalNumber = typeof newValue === "number" ? newValue : dailyGoalValue;
     await saveSettings({ goal: goalNumber });
-    setUpdate((u) => u + 1); // força recarregar a meta do backend
+    setUpdate((u) => u + 1);
   }
 
   return (

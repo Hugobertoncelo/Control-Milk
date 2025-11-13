@@ -76,7 +76,7 @@ export default function MedicineList({ meds, onRemove }: MedicineListProps) {
                     </div>
                   </div>
                   <button
-                    className="ml-2 rounded-full px-3 py-1 bg-red-500 text-white text-sm hover:bg-red-600"
+                    className="ml-2 rounded-full w-8 h-8 flex items-center justify-center bg-red-500 text-white text-sm hover:bg-red-600"
                     onClick={() => handleRemove(i)}
                     title="Remover remédio"
                   >

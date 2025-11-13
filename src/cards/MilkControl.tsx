@@ -23,6 +23,7 @@ export default function MilkControl({
   const [wait, setWait] = useState(false);
   const [customMl, setCustomMl] = useState("");
   const [totalMl, setTotalMl] = useState(0);
+  const [goalInput, setGoalInput] = useState(dailyGoal?.toString() ?? "");
 
   useEffect(() => {
     async function fetchTotal() {
@@ -41,6 +42,10 @@ export default function MilkControl({
     fetchTotal();
   }, [wait, onUpdate]);
 
+  useEffect(() => {
+    setGoalInput(dailyGoal === 0 ? "" : dailyGoal?.toString() ?? "");
+  }, [dailyGoal]);
+
   const progress = Math.min((totalMl / dailyGoal) * 100, 100);
 
   async function handleAddMl(value: number) {
@@ -58,15 +63,26 @@ export default function MilkControl({
     <>
       {/* Meta diária */}
       <Flex justifyContent="justify-start" spaceX="space-x-2" marginTop="mt-4">
-        <TextInput
+        <input
+          type="text"
           placeholder="Meta diária (ml)"
-          value={dailyGoal.toString()}
-          onChange={async (e: ChangeEvent<HTMLInputElement>) => {
-            const value = Number(e.currentTarget.value.replace(/\D/g, ""));
-            setDailyGoal?.(value);
-            await saveSettings({ goal: value });
+          className="border rounded px-3 py-2 max-w-xs text-center text-base focus:outline-none focus:ring-2 focus:ring-blue-400"
+          value={goalInput}
+          onChange={(e) => {
+            const value = e.currentTarget.value.replace(/\D/g, "");
+            setGoalInput(value);
           }}
-          maxWidth="max-w-xs"
+          onBlur={async () => {
+            if (goalInput === "") {
+              setGoalInput(dailyGoal?.toString() ?? "600");
+              setDailyGoal?.(dailyGoal || 600);
+              await saveSettings({ goal: dailyGoal || 600 });
+              return;
+            }
+            const num = Number(goalInput);
+            setDailyGoal?.(num);
+            await saveSettings({ goal: num });
+          }}
         />
       </Flex>
       {/* Total */}
